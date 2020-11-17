@@ -9,6 +9,7 @@ with bcls as
        clv.cfv_id,
        prj.prj_id,
        prj.name project_name,
+       connect_by_isleaf isleaf,
        level clv_lev
 from clv, cfv, prj
 where clv.cfv_id = cfv.cfv_id
@@ -32,12 +33,42 @@ select bcls.mlt_id,
        bcls.prj_id,
        bcls.project_name,
        bcls.clv_lev,
-       gen_shbl_cls_pp2(  bcls.cfv_id,
-	                      bcls.mlt_id,
-	                      bcls.clf_id,
-	                      bcls.cls_id,
-	                      nmpp.sname,
-	                      1) sname
+       case when isleaf = 1 then 
+	       	gen_shbl_cls_pp2(  bcls.cfv_id,
+			                   bcls.mlt_id,
+			                   bcls.clf_id,
+			                   bcls.cls_id,
+			                   nmpp.sname,
+			                   1) 
+	   else null end sname,
+	   case when isleaf = 1 then
+		   gen_shbl_cls_pp2(  bcls.cfv_id,
+		                      bcls.mlt_id,
+		                      bcls.clf_id,
+		                      bcls.cls_id,
+		                      nmpp.fname,
+		                      1) 
+	   else null end fname,
+	   case when isleaf = 1 then 
+		   (select max(ums.code)
+		    from cum, ums
+		    where cum.mlt_id = bcls.mlt_id
+		      and cum.clf_id = bcls.clf_id
+		      and cum.cls_id = bcls.cls_id
+		      and cum.cst_id = 466
+		      and cum.prj_id = 62
+		      and cum.ums_id = ums.ums_id) 
+		   else null end ums_code,
+	   case when isleaf = 1 then
+	   (select max(ums.name)
+	    from cum, ums
+	    where cum.mlt_id = bcls.mlt_id
+	      and cum.clf_id = bcls.clf_id
+	      and cum.cls_id = bcls.cls_id
+	      and cum.cst_id = 466
+	      and cum.prj_id = 62
+	      and cum.ums_id = ums.ums_id)
+	    else null end ums_name
 from bcls, nmpp
 where bcls.mlt_id = nmpp.mlt_id (+) 
   and bcls.clf_id = nmpp.clf_id (+)

@@ -135,4 +135,4 @@ dmypy.json
 .vscode/settings.json
 **/migrations/*
 **/__pycache__/*
-eqmapi/mdg/migrations/0001_initial.py
+**/upload/*

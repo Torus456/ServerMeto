@@ -1,9 +1,5 @@
 import smtplib
-import os
 import sys
-from django.conf import settings
-from configparser import ConfigParser
-from email.utils import formatdate
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email.header import Header
@@ -11,7 +7,7 @@ from email import encoders
 from email.mime.multipart import MIMEMultipart
 
 
-def sendmail(address_mail, subject_mail, text_mail, attachment):
+def sendmail(address_mail, subject_mail, text_mail, file_attachment):
     """
     Отправить данные на почту:
     @address_mail - почта
@@ -26,7 +22,7 @@ def sendmail(address_mail, subject_mail, text_mail, attachment):
     # EMAIL_USE_TLS = True
     DEFAULT_FROM_EMAIL = 'support@incon.ru'
     # SUBJECT = "Согласование материалов"
-    file_to_attach = os.path.join(settings.BASE_DIR, "Instruction.docx")
+    file_to_attach = file_attachment  # os.path.join(settings.BASE_DIR, "Instruction.docx")
     addresses = []
     addresses.append(address_mail)
     # Готовим сообщение

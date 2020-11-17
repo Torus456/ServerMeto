@@ -64,8 +64,8 @@ select b.mlt_id,
        sdv.code,
        sdv.name,
        sdv.ord,
-       case when sgn.valtype = 0 then 'Текстовый' else 'Числовой' end valtype,
-       case when vsn.vsn_id = 0 then 'Не требуется'
+       case when sgn.valtype = 0 then 'РўРµРєСЃС‚РѕРІС‹Р№' else 'Р§РёСЃР»РѕРІРѕР№' end valtype,
+       case when vsn.vsn_id = 0 then vsn.symsgn
        		else case when sgn.valtype = 0 then vsn.valchar else to_char(vsn.valnum) end end value,
        vsn.symsgn
 from nclv b, sdv, sgn, dvs, vds, vsn 
@@ -98,6 +98,11 @@ where b.mlt_id = sdv.mlt_id
                 and vso.vsn_id = vds.vsn_id
                 and vso.mlt_id = obj.mlt_id
                 and vso.obj_id = obj.obj_id
-                and obj.prj_id = b.prj_id)
+                and obj.prj_id = b.prj_id
+                and exists (select 1
+                			from vobj
+                			where vobj.mlt_id = obj.mlt_id
+                			  and vobj.obj_id = obj.obj_id
+                			  and vobj.aobj_id = 9266))
   and regexp_like(b.nfname,'{([^[{]*)\[&?'||sdv.dvs_id|| '\]')
 order by b.code, sdv.ord
