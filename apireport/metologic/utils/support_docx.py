@@ -7,8 +7,16 @@ import pandas as pd
 from django.conf import settings
 from docx.shared import Inches
 from docx.shared import Pt
-#  from docx.enum.table import WD_ALIGN_VERTICAL
-#  from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+
+
+def fill_dataframe(path, query, connect, project_args):
+    '''Заполнить датафрейм на основе запроса'''
+    SQL_QUERY = ""
+    with open(os.path.join(path, query), 'r') as file:
+        SQL_QUERY = file.read().replace('\n', ' ')
+    df = pd.read_sql(SQL_QUERY, con=connect, params=project_args)
+    result = df.where((pd.notnull(df)), None)
+    return result
 
 
 def create_docx(data_js):
@@ -23,51 +31,40 @@ def create_docx(data_js):
         "MLT_ID": data_js.get("project_args").get("mlt_id"),
         "CLF_ID": data_js.get("project_args").get("clf_id"),
         "CLS_ID": data_js.get("project_args").get("cls_id"),
-        "CFV_ID": data_js.get("project_args").get("cfv_id")
+        "CFV_ID": data_js.get("project_args").get("cfv_id"),
+        "PRJ_ID": data_js.get("project_args").get("prj_id")
     }
-    # print(project_args)
-    # Классы
-    SQL_QUERY = ""
-    with open(os.path.join(sql_path, 'cls_for_doc.sql'), 'r') as file:
-        SQL_QUERY = file.read().replace('\n', ' ')
-    df = pd.read_sql(SQL_QUERY, con=con, params=project_args)
-    df_cls = df.where((pd.notnull(df)), None)
-    # Признаки
-    SQL_QUERY = ""
-    with open(os.path.join(sql_path, 'dvs_for_doc.sql'), 'r') as file:
-        SQL_QUERY = file.read().replace('\n', ' ')
-    df = pd.read_sql(SQL_QUERY, con=con, params=project_args)
-    df_dvs = df.where((pd.notnull(df)), None)
-    # Значения признаков
-    SQL_QUERY = ""
-    with open(os.path.join(sql_path, 'vsn_for_doc.sql'), 'r') as file:
-        SQL_QUERY = file.read().replace('\n', ' ')
-    df = pd.read_sql(SQL_QUERY, con=con, params=project_args)
-    df_vsn = df.where((pd.notnull(df)), None)
-    # Примеры записей
-    with open(os.path.join(sql_path, 'obj_for_doc.sql'), 'r') as file:
-        SQL_QUERY = file.read().replace('\n', ' ')
-    df = pd.read_sql(SQL_QUERY, con=con, params=project_args)
-    df_obj = df.where((pd.notnull(df)), None)
-    # ОКВЭД
-    with open(os.path.join(sql_path, 'okved_for_doc.sql'), 'r') as file:
-        SQL_QUERY = file.read().replace('\n', ' ')
-    df = pd.read_sql(SQL_QUERY, con=con, params=project_args)
-    df_okved = df.where((pd.notnull(df)), None)
+    project_args_obj = {
+        "MLT_ID": data_js.get("project_args").get("mlt_id"),
+        "CLF_ID": data_js.get("project_args").get("clf_id"),
+        "CLS_ID": data_js.get("project_args").get("cls_id"),
+        "CFV_ID": data_js.get("project_args").get("cfv_id"),
+        "INCLF_ID": data_js.get("project_args").get("inclf_id"),
+        "AOBJ_ID": data_js.get("project_args").get("aobj_id"),
 
+    }
+    # Классы, признаки, значения, объекты, оквед
+    df_cls = fill_dataframe(sql_path, 'cls_for_doc.sql', con, project_args)
+    df_dvs = fill_dataframe(sql_path, 'dvs_for_doc.sql', con, project_args)
+    df_vsn = fill_dataframe(sql_path, 'vsn_for_doc.sql', con, project_args_obj)
+    df_obj = fill_dataframe(sql_path, 'obj_for_doc.sql', con, project_args_obj)
+    df_okved = fill_dataframe(sql_path, 'okved_for_doc.sql', con, project_args)
     document = docx.Document()
     document.add_heading('Методика', 0)
-    for index, row in df_cls.iterrows():
-        p = document.add_paragraph(
-            row["CODE"] + " - " + row["NAME"],
-            style="List Bullet"
-        )
-        p.paragraph_format.left_indent = Inches((row["CLV_LEV"]-1)/4)
+    # Формируем для создания иерархии
+    # for index, row in df_cls.iterrows():
+    #     code = "XXX" if row["CODE"] is None else row["CODE"]
+    #     p = document.add_paragraph(
+    #         code + " - " + row["NAME"],
+    #         style="List Bullet"
+    #     )
+    #     p.paragraph_format.left_indent = Inches((row["CLV_LEV"]-1)/4)
 
     for index, row in df_cls.iterrows():
-        document.add_paragraph().add_run().add_break()
+        code = "XXX" if row["CODE"] is None else row["CODE"]
+        document.add_heading(code + " - " + row["NAME"], row["CLV_LEV"])
         if row["SNAME"]:
-            document.add_heading(row["CODE"] + " - " + row["NAME"], 2)
+            # document.add_paragraph().add_run().add_break()
             p = document.add_paragraph(
                 "Шаблон краткого наименование",
                 style="List Bullet 2"
@@ -95,17 +92,17 @@ def create_docx(data_js):
             # Шапка для таблицы объектов эталона
             cell = table_obj.cell(0, 0)
             cell.text = "Краткое наименование"
-            cell.paragraphs[0].style = "Heading 4"
+            cell.paragraphs[0].style = "Normal"
             cell.paragraphs[0].alignment = 1
             cell = table_obj.cell(0, 1)
             cell.width = Inches(4.5)
             cell.text = "Полное наименование"
-            cell.paragraphs[0].style = "Heading 4"
+            cell.paragraphs[0].style = "Normal"
             cell.paragraphs[0].alignment = 1
             cell = table_obj.cell(0, 2)
             cell.width = Inches(0.5)
             cell.text = "ЕИ"
-            cell.paragraphs[0].style = "Heading 4"
+            cell.paragraphs[0].style = "Normal"
             cell.paragraphs[0].alignment = 1
             i = 1
             for ind_obj, obj in df_obj_cls.iterrows():
@@ -117,6 +114,7 @@ def create_docx(data_js):
                 cell.width = Inches(0.5)
                 cell.text = obj["UMS_CODE"]
                 i += 1
+            document.add_paragraph().add_run().add_break()
             p = document.add_paragraph(
                 "Перечень признаков класса МТР",
                 style="List Bullet 2"
@@ -134,11 +132,11 @@ def create_docx(data_js):
             # Шапка для таблицы признаков
             cell = table.cell(0, 0)
             cell.text = "Наименование признака"
-            cell.paragraphs[0].style = "Heading 4"
+            cell.paragraphs[0].style = "Normal"
             cell.paragraphs[0].alignment = 1
             cell = table.cell(0, 1)
             cell.text = "Тип признака"
-            cell.paragraphs[0].style = "Heading 4"
+            cell.paragraphs[0].style = "Normal"
             cell.paragraphs[0].alignment = 1
             cnt = 1
             for ind_attr, attr in df_attribute_cls.iterrows():
@@ -151,6 +149,7 @@ def create_docx(data_js):
             df_vsn_cls = df_vsn.loc[df_vsn["CLS_ID"] == row["CLS_ID"]]
             values = len(df_vsn_cls)
             if values > 0:
+                document.add_paragraph().add_run().add_break()
                 p = document.add_paragraph(
                     "Список значений",
                     style="List Bullet 2"
@@ -166,15 +165,15 @@ def create_docx(data_js):
                 # Шапка для таблицы значений признаков
                 cell = table_vsn.cell(0, 0)
                 cell.text = "Наименование признака"
-                cell.paragraphs[0].style = "Heading 4"
+                cell.paragraphs[0].style = "Normal"
                 cell.paragraphs[0].alignment = 1
                 cell = table_vsn.cell(0, 1)
                 cell.text = "Значение"
-                cell.paragraphs[0].style = "Heading 4"
+                cell.paragraphs[0].style = "Normal"
                 cell.paragraphs[0].alignment = 1
                 cell = table_vsn.cell(0, 2)
                 cell.text = "Обозначение"
-                cell.paragraphs[0].style = "Heading 4"
+                cell.paragraphs[0].style = "Normal"
                 cell.paragraphs[0].alignment = 1
                 j = 1
                 k = 1
@@ -187,9 +186,9 @@ def create_docx(data_js):
                     cell.text = vsn["VALUE"]
                     cell = table_vsn.cell(j, 2)
                     cell.text = "" if vsn["SYMSGN"] is None else vsn["SYMSGN"]
+                    # объединяем ячейки
                     if union_name != vsn["NAME"]:
                         union_name = vsn["NAME"]
-                        print(union_name)
                         start_union = j
                         k = 1
                     else:
@@ -199,6 +198,7 @@ def create_docx(data_js):
                         A.text = union_name
                         k += 1
                     j += 1
+                document.add_paragraph().add_run().add_break()
                 p = document.add_paragraph(
                     "Базовая единица измерения",
                     style="List Bullet 2"
@@ -209,41 +209,46 @@ def create_docx(data_js):
                 # Шапка для таблицы значений признаков
                 cell = table_umscls.cell(0, 0)
                 cell.text = "Наименование "
-                cell.paragraphs[0].style = "Heading 4"
+                cell.paragraphs[0].style = "Normal"
                 cell.paragraphs[0].alignment = 1
                 cell = table_umscls.cell(0, 1)
                 cell.text = "Обозначение"
-                cell.paragraphs[0].style = "Heading 4"
+                cell.paragraphs[0].style = "Normal"
                 cell.paragraphs[0].alignment = 1
                 cell = table_umscls.cell(1, 0)
                 cell.text = row["UMS_CODE"]
                 cell = table_umscls.cell(1, 1)
                 cell.text = row["UMS_NAME"]
-                df_okved_cls = df_okved.loc[df_vsn["CLS_ID"] == row["CLS_ID"]]
+                df_okved_cls = df_okved.loc[
+                    df_okved["CLS_ID"] == row["CLS_ID"]
+                    ][["OKVED_CODE", "OKVED_NAME"]].drop_duplicates()
                 if len(df_okved_cls) > 0:
+                    document.add_paragraph().add_run().add_break()
                     p = document.add_paragraph(
                         "Общероссийский классификатор видов экономической деятельности (ОКВЭД2)",
                         style="List Bullet 2"
                     )
-                    table_okved = document.add_table(rows=len(df_okved_cls), cols=2)
+                    table_okved = document.add_table(rows=len(df_okved_cls) + 1, cols=2)
                     table_okved.style = 'Table Grid'
                     table_okved.autofit = True
                     # Шапка для таблицы классов ОКВЕД2
                     cell = table_okved.cell(0, 0)
                     cell.text = "Код класса"
-                    cell.paragraphs[0].style = "Heading 4"
+                    cell.paragraphs[0].style = "Normal"
                     cell.paragraphs[0].alignment = 1
                     cell = table_okved.cell(0, 1)
                     cell.text = "Наименование класса"
-                    cell.paragraphs[0].style = "Heading 4"
+                    cell.paragraphs[0].style = "Normal"
                     cell.paragraphs[0].alignment = 1
-            #         df_okved_cls
+                    r = 1
                     for ind_okv, okv in df_okved_cls.iterrows():
-                        cell = table_okved.cell(ind_okv, 0)
+                        cell = table_okved.cell(r, 0)
                         cell.text = okv["OKVED_CODE"]
-                        cell = table_okved.cell(ind_okv, 1)
+                        cell = table_okved.cell(r, 1)
                         cell.text = okv["OKVED_NAME"]
-                    document.add_page_break()
+                        r += 1
+        if row["SNAME"]:
+            document.add_page_break()
 
     path_file = (
                     settings.BASE_DIR +
@@ -253,7 +258,5 @@ def create_docx(data_js):
                     str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) +
                     ".docx"
                 )
-    # print(path_file)
-    # document.save(settings.BASE_DIR + "\\upload\\Instruction.docx")
     document.save(path_file)
     return path_file

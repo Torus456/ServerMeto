@@ -9,7 +9,8 @@ with bcls as
        clv.cfv_id,
        prj.prj_id,
        prj.name project_name,
-       level clv_lev
+       level clv_lev, 
+       connect_by_isleaf list
 from clv, cfv, prj
 where clv.cfv_id = cfv.cfv_id
   and prj.prj_id = cfv.prj_id
@@ -34,12 +35,14 @@ select distinct
        bcls.project_name,
        bcls.clv_lev,
        cls.code okved_code,
-       cls.name okved_name 
+       cls.name okved_name,
+       :prj_id prj_id
 from bcls, car, cls
 where bcls.mlt_id = car.mlt_id 
   and bcls.clf_id = car.clf_id 
-  and bcls.cls_id = car.cls_id 
-  and car.ass_clf_id = 1730
+  and bcls.cls_id = car.cls_id
+  and bcls.list = 1
+  and car.cas_id in (328, 325)
   and car.ass_mlt_id = cls.mlt_id
   and car.ass_clf_id = cls.clf_id
   and car.ass_cls_id = cls.cls_id

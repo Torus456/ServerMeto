@@ -14,6 +14,7 @@ with bcls as
 from clv, cfv, prj
 where clv.cfv_id = cfv.cfv_id
   and prj.prj_id = cfv.prj_id
+  and clv.status <> 2
 start with clv.mlt_id = :mlt_id
   and clv.clf_id = :clf_id
   and clv.cls_id = :cls_id
@@ -50,24 +51,26 @@ select bcls.mlt_id,
 		                      1) 
 	   else null end fname,
 	   case when isleaf = 1 then 
-		   (select max(ums.code)
-		    from cum, ums
+		   (select max(umsc.code)
+		    from cum, ums, umsc
 		    where cum.mlt_id = bcls.mlt_id
 		      and cum.clf_id = bcls.clf_id
 		      and cum.cls_id = bcls.cls_id
 		      and cum.cst_id = 466
-		      and cum.prj_id = 62
-		      and cum.ums_id = ums.ums_id) 
+		      and cum.prj_id = :prj_id
+		      and cum.ums_id = ums.ums_id
+	          and ums.ums_id = umsc.ums_id) 
 		   else null end ums_code,
 	   case when isleaf = 1 then
-	   (select max(ums.name)
-	    from cum, ums
+	   (select max(umsc.name)
+	    from cum, ums, umsc 
 	    where cum.mlt_id = bcls.mlt_id
 	      and cum.clf_id = bcls.clf_id
 	      and cum.cls_id = bcls.cls_id
 	      and cum.cst_id = 466
-	      and cum.prj_id = 62
-	      and cum.ums_id = ums.ums_id)
+	      and cum.prj_id = :prj_id
+	      and cum.ums_id = ums.ums_id
+	      and ums.ums_id = umsc.ums_id)
 	    else null end ums_name
 from bcls, nmpp
 where bcls.mlt_id = nmpp.mlt_id (+) 

@@ -69,27 +69,66 @@ select xcls.mlt_id,
        xcls.name,
        oclp.sname,
        oclp.fname,
-       ums.code ums_code,
-       ums.name ums_name
-from xcls, ocl, obj, oclp, oum, ums 
+       umsc.code ums_code,
+       umsc.name ums_name
+from xcls, ocl, obj, oclp, oum, umsc 
 where xcls.mlt_id = ocl.mlt_id
   and xcls.clf_id = ocl.clf_id
   and xcls.cls_id = ocl.cls_id
   and ocl.mlt_id = obj.mlt_id
   and ocl.obj_id = obj.obj_id
   and obj.status = 1
+  and ocl.clf_id = :inclf_id
   and xcls.prj_id = obj.prj_id
   and ocl.mlt_id = oclp.mlt_id
   and ocl.clf_id = oclp.clf_id
   and ocl.cls_id = oclp.cls_id
   and ocl.obj_id = oclp.obj_id
+  and oclp.name||oclp.fname||oclp.sname not like '%?%'
+  and oclp.prj_id = xcls.prj_id
   and obj.mlt_id = oum.mlt_id
   and obj.obj_id = oum.obj_id
   and oum.prj_id = obj.prj_id
-  and oum.ums_id = ums.ums_id
-  and oclp.prj_id = xcls.prj_id
+  and oum.umsc_id = umsc.umsc_id
   and exists (select 1 from vobj 
               where obj.mlt_id = vobj.mlt_id
                 and obj.obj_id = vobj.obj_id
-                and vobj.aobj_id = 9266
-                and vobj.valchar = '1')
+                and vobj.aobj_id = :aobj_id)
+union all
+select xcls.mlt_id, 
+       xcls.clf_id_pp clf_id, 
+       xcls.cls_id_pp cls_id,
+       xcls.code,
+       xcls.name,
+       oclp.sname,
+       oclp.fname,
+       umsc.code ums_code,
+       umsc.name ums_name
+from xcls, ocl, obj, oclp, oum, umsc 
+where xcls.mlt_id = ocl.mlt_id
+  and xcls.clf_id = ocl.clf_id
+  and xcls.cls_id = ocl.cls_id
+  and ocl.mlt_id = obj.mlt_id
+  and ocl.obj_id = obj.obj_id
+  and obj.status = 1
+  and ocl.clf_id = :clf_id
+  and not exists (select 1
+                  from ocl oclin
+                  where ocl.mlt_id = oclin.mlt_id
+                    and ocl.obj_id = oclin.obj_id
+                    and oclin.clf_id = :inclf_id)
+  and xcls.prj_id = obj.prj_id
+  and ocl.mlt_id = oclp.mlt_id
+  and ocl.clf_id = oclp.clf_id
+  and ocl.cls_id = oclp.cls_id
+  and ocl.obj_id = oclp.obj_id
+  and oclp.prj_id = xcls.prj_id
+  and oclp.name||oclp.fname||oclp.sname not like '%?%'
+  and obj.mlt_id = oum.mlt_id
+  and obj.obj_id = oum.obj_id
+  and oum.prj_id = obj.prj_id
+  and oum.umsc_id = umsc.umsc_id  
+  and exists (select 1 from vobj 
+              where obj.mlt_id = vobj.mlt_id
+                and obj.obj_id = vobj.obj_id
+                and vobj.aobj_id = :aobj_id)

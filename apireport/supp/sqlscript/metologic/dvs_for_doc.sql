@@ -13,6 +13,7 @@ with bcls as
 from clv, cfv, prj
 where clv.cfv_id = cfv.cfv_id
   and prj.prj_id = cfv.prj_id
+  and prj.prj_id = :prj_id
 start with clv.mlt_id = :mlt_id
   and clv.clf_id = :clf_id
   and clv.cls_id = :cls_id
