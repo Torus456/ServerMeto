@@ -11,7 +11,7 @@ with bcls as
        prj.name project_name,
        level clv_lev,
        connect_by_isleaf list
-from clv, cfv, prj
+from clv, cfv, prj 
 where clv.cfv_id = cfv.cfv_id
   and prj.prj_id = cfv.prj_id
 start with clv.mlt_id = :mlt_id
@@ -57,21 +57,29 @@ as (select   b.mlt_id,
              b.code,
              b.name,
              b.list,
-             b.prj_id
-      from   bcls b, zcls z
+             b.prj_id,
+             q.uni_code ums_code,
+             q.uni_name ums_name
+      from   bcls b, zcls z, cum, cs_art_load.uni_ums q
      where       b.mlt_id = z.mlt_id(+)
              and b.clf_id = z.root_clf(+)
-             and b.cls_id = z.root_cls(+))
-select xcls.mlt_id, 
+             and b.cls_id = z.root_cls(+)
+             and b.mlt_id = cum.mlt_id (+)
+		     and b.clf_id = cum.clf_id (+)
+		     and b.cls_id = cum.cls_id (+) 
+		     and cum.cst_id (+) = 466
+		     and cum.ums_id = q.ums_id (+)
+		     )
+select distinct xcls.mlt_id, 
        xcls.clf_id_pp clf_id, 
        xcls.cls_id_pp cls_id,
        xcls.code,
        xcls.name,
        oclp.sname,
        oclp.fname,
-       umsc.code ums_code,
-       umsc.name ums_name
-from xcls, ocl, obj, oclp, oum, umsc 
+       nvl(q.uni_code, xcls.ums_code) ums_code,
+       nvl(q.uni_name, xcls.ums_name) ums_name
+from xcls, ocl, obj, oclp, oum, cs_art_load.uni_ums q
 where xcls.mlt_id = ocl.mlt_id
   and xcls.clf_id = ocl.clf_id
   and xcls.cls_id = ocl.cls_id
@@ -86,25 +94,26 @@ where xcls.mlt_id = ocl.mlt_id
   and ocl.obj_id = oclp.obj_id
   and oclp.name||oclp.fname||oclp.sname not like '%?%'
   and oclp.prj_id = xcls.prj_id
-  and obj.mlt_id = oum.mlt_id
-  and obj.obj_id = oum.obj_id
-  and oum.prj_id = obj.prj_id
-  and oum.umsc_id = umsc.umsc_id
+  and obj.mlt_id = oum.mlt_id (+)
+  and obj.obj_id = oum.obj_id (+)
+  and obj.prj_id = oum.prj_id (+)
+  and oum.cst_id (+) = 466
+  and oum.ums_id = q.ums_id (+)
   and exists (select 1 from vobj 
               where obj.mlt_id = vobj.mlt_id
                 and obj.obj_id = vobj.obj_id
                 and vobj.aobj_id = :aobj_id)
 union all
-select xcls.mlt_id, 
+select distinct xcls.mlt_id, 
        xcls.clf_id_pp clf_id, 
        xcls.cls_id_pp cls_id,
        xcls.code,
        xcls.name,
        oclp.sname,
        oclp.fname,
-       umsc.code ums_code,
-       umsc.name ums_name
-from xcls, ocl, obj, oclp, oum, umsc 
+       nvl(ums.code, xcls.ums_code) ums_code,
+       nvl(ums.name, xcls.ums_name) ums_name
+from xcls, ocl, obj, oclp, oum, ums
 where xcls.mlt_id = ocl.mlt_id
   and xcls.clf_id = ocl.clf_id
   and xcls.cls_id = ocl.cls_id
@@ -124,10 +133,11 @@ where xcls.mlt_id = ocl.mlt_id
   and ocl.obj_id = oclp.obj_id
   and oclp.prj_id = xcls.prj_id
   and oclp.name||oclp.fname||oclp.sname not like '%?%'
-  and obj.mlt_id = oum.mlt_id
-  and obj.obj_id = oum.obj_id
-  and oum.prj_id = obj.prj_id
-  and oum.umsc_id = umsc.umsc_id  
+  and obj.mlt_id = oum.mlt_id (+)
+  and obj.obj_id = oum.obj_id (+)
+  and obj.prj_id = oum.prj_id (+)
+  and oum.cst_id (+) = 466
+  and oum.ums_id = ums.ums_id (+)  
   and exists (select 1 from vobj 
               where obj.mlt_id = vobj.mlt_id
                 and obj.obj_id = vobj.obj_id

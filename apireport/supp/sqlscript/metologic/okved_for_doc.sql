@@ -31,7 +31,6 @@ select distinct
        bcls.name,
        bcls.code,
        bcls.cfv_id,
-       bcls.prj_id,
        bcls.project_name,
        bcls.clv_lev,
        cls.code okved_code,

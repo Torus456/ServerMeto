@@ -77,3 +77,4 @@ where bcls.mlt_id = nmpp.mlt_id (+)
   and bcls.clf_id = nmpp.clf_id (+)
   and bcls.cls_id = nmpp.cls_id (+)
   and bcls.prj_id = nmpp.prj_id (+)
+order by bcls.code

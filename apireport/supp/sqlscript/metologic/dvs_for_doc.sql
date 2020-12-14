@@ -65,7 +65,9 @@ select b.mlt_id,
        sdv.code,
        sdv.name,
        sdv.ord,
-       case when sgn.valtype = 0 then 'Текстовый' else 'Числовой' end valtype      
+       case when sgn.valtype = 0 then 'Текстовый' 
+			when up_zhaikmuhay.get_type_dvs_pp(sdv.mlt_id, sdv.clf_id, sdv.cls_id, sdv.sgn_id, sdv.dvs_id, :prj_id) = 1 then 'Текстовый' 
+			else 'Числовой' end valtype     
 from nclv b, sdv, sgn
 where b.mlt_id = sdv.mlt_id 
   and b.clf_id = sdv.clf_id 
