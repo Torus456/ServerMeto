@@ -34,47 +34,35 @@ select bcls.mlt_id,
        bcls.prj_id,
        bcls.project_name,
        bcls.clv_lev,
-       case when isleaf = 1 then 
+       /*case when isleaf = 1 then 
 	       	gen_shbl_cls_pp2(  bcls.cfv_id,
 			                   bcls.mlt_id,
 			                   bcls.clf_id,
 			                   bcls.cls_id,
 			                   nmpp.sname,
 			                   1) 
+	   else null end sname,*/
+       case when isleaf = 1 then 
+       		gen_shbl_cls_pp2(bcls.cfv_id, bcls.mlt_id, bcls.clf_id, bcls.cls_id, nmpp.sname, 1) 
+	       	 /*sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id,0) */
 	   else null end sname,
 	   case when isleaf = 1 then
-		   gen_shbl_cls_pp2(  bcls.cfv_id,
-		                      bcls.mlt_id,
-		                      bcls.clf_id,
-		                      bcls.cls_id,
-		                      nmpp.fname,
-		                      1) 
+		   sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id,1)
 	   else null end fname,
-	   case when isleaf = 1 then 
-		   (select max(umsc.code)
-		    from cum, ums, umsc
-		    where cum.mlt_id = bcls.mlt_id
-		      and cum.clf_id = bcls.clf_id
-		      and cum.cls_id = bcls.cls_id
-		      and cum.cst_id = 466
-		      and cum.prj_id = :prj_id
-		      and cum.ums_id = ums.ums_id
-	          and ums.ums_id = umsc.ums_id) 
+	   case when isleaf = 1 then nvl(q.uni_code, ums.code)
 		   else null end ums_code,
-	   case when isleaf = 1 then
-	   (select max(umsc.name)
-	    from cum, ums, umsc 
-	    where cum.mlt_id = bcls.mlt_id
-	      and cum.clf_id = bcls.clf_id
-	      and cum.cls_id = bcls.cls_id
-	      and cum.cst_id = 466
-	      and cum.prj_id = :prj_id
-	      and cum.ums_id = ums.ums_id
-	      and ums.ums_id = umsc.ums_id)
-	    else null end ums_name
-from bcls, nmpp
+	   case when isleaf = 1 then nvl(q.uni_name, ums.name)
+	    else null end ums_name,
+	  :prj_id prj_id
+from bcls, nmpp, cum, cs_art_load.uni_ums q, ums 
 where bcls.mlt_id = nmpp.mlt_id (+) 
   and bcls.clf_id = nmpp.clf_id (+)
   and bcls.cls_id = nmpp.cls_id (+)
   and bcls.prj_id = nmpp.prj_id (+)
+  and bcls.mlt_id = cum.mlt_id (+)
+  and bcls.clf_id = cum.clf_id (+) 
+  and bcls.cls_id = cum.cls_id (+)  
+  and cum.cst_id (+) = 466
+  and cum.ums_id = q.ums_id (+)
+  and cum.ums_id = ums.ums_id (+)
 order by bcls.code

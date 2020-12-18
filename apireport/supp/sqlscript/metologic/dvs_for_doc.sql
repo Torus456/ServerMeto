@@ -52,7 +52,8 @@ where bcls.mlt_id = nmpp.mlt_id
   and bcls.clf_id = nmpp.clf_id
   and bcls.cls_id = nmpp.cls_id
   and bcls.prj_id = nmpp.prj_id)
-select b.mlt_id,
+select distinct
+       b.mlt_id,
        b.clf_id,
        b.cls_id,
        b.cfv_id,
@@ -65,14 +66,20 @@ select b.mlt_id,
        sdv.code,
        sdv.name,
        sdv.ord,
-       case when sgn.valtype = 0 then 'Текстовый' 
+       nvl( q.chislovojtekstovyj,
+       		case when sgn.valtype = 0 then 'Текстовый' 
 			when up_zhaikmuhay.get_type_dvs_pp(sdv.mlt_id, sdv.clf_id, sdv.cls_id, sdv.sgn_id, sdv.dvs_id, :prj_id) = 1 then 'Текстовый' 
-			else 'Числовой' end valtype     
-from nclv b, sdv, sgn
+			else 'Числовой' end) valtype     
+from nclv b, sdv, sgn, cs_art_load.uni_dvs_done_all q 
 where b.mlt_id = sdv.mlt_id 
   and b.clf_id = sdv.clf_id 
   and b.cls_id = sdv.cls_id
   and b.cfv_id = sdv.cfv_id
+  and sdv.mlt_id = q.mlt_id (+)
+  and sdv.clf_id = q.clf_id (+)
+  and sdv.cls_id = q.cls_id (+)
+  and sdv.sgn_id = q.sgn_id (+)
+  and sdv.dvs_id = q.dvs_id (+)
   and sdv.mlt_id = sgn.mlt_id
   and sdv.sgn_id = sgn.sgn_id
   and regexp_like(b.nfname,'{([^[{]*)\[&?'||sdv.dvs_id|| '\]')

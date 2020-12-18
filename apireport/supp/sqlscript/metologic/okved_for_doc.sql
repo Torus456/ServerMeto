@@ -45,3 +45,4 @@ where bcls.mlt_id = car.mlt_id
   and car.ass_mlt_id = cls.mlt_id
   and car.ass_clf_id = cls.clf_id
   and car.ass_cls_id = cls.cls_id
+order by code

@@ -7,6 +7,8 @@ import pandas as pd
 from django.conf import settings
 from docx.shared import Inches
 from docx.shared import Pt
+from docx.oxml.ns import nsdecls
+from docx.oxml import parse_xml
 
 
 def fill_dataframe(path, query, connect, project_args):
@@ -39,9 +41,9 @@ def create_docx(data_js):
         "CLF_ID": data_js.get("project_args").get("clf_id"),
         "CLS_ID": data_js.get("project_args").get("cls_id"),
         "CFV_ID": data_js.get("project_args").get("cfv_id"),
+        "PRJ_ID": data_js.get("project_args").get("prj_id"),
         "INCLF_ID": data_js.get("project_args").get("inclf_id"),
         "AOBJ_ID": data_js.get("project_args").get("aobj_id"),
-
     }
     # Классы, признаки, значения, объекты, оквед
     df_cls = fill_dataframe(sql_path, 'cls_for_doc.sql', con, project_args)
@@ -50,7 +52,7 @@ def create_docx(data_js):
     df_obj = fill_dataframe(sql_path, 'obj_for_doc.sql', con, project_args_obj)
     df_okved = fill_dataframe(sql_path, 'okved_for_doc.sql', con, project_args)
     document = docx.Document()
-    document.add_heading('Методика', 0)
+    # document.add_heading('Методика', 0)
     # Формируем для создания иерархии
     # for index, row in df_cls.iterrows():
     #     code = "XXX" if row["CODE"] is None else row["CODE"]
@@ -59,21 +61,20 @@ def create_docx(data_js):
     #         style="List Bullet"
     #     )
     #     p.paragraph_format.left_indent = Inches((row["CLV_LEV"]-1)/4)
-
     for index, row in df_cls.iterrows():
         code = "XXX" if row["CODE"] is None else row["CODE"]
         document.add_heading(code + " - " + row["NAME"], row["CLV_LEV"])
         if row["SNAME"]:
             # document.add_paragraph().add_run().add_break()
             p = document.add_paragraph(
-                "Шаблон краткого наименование",
+                "Шаблон краткого наименования",
                 style="List Bullet 2"
             )
             p = document.add_paragraph(
                 row["SNAME"]
             )
             p = document.add_paragraph(
-                "Шаблон полного наименование",
+                "Шаблон полного наименования",
                 style="List Bullet 2"
             )
             p = document.add_paragraph(
@@ -94,16 +95,19 @@ def create_docx(data_js):
             cell.text = "Краткое наименование"
             cell.paragraphs[0].style = "Normal"
             cell.paragraphs[0].alignment = 1
+            cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E0E0E0"/>'.format(nsdecls('w'))))
             cell = table_obj.cell(0, 1)
-            cell.width = Inches(4.5)
+            cell.width = Inches(3.5)
             cell.text = "Полное наименование"
             cell.paragraphs[0].style = "Normal"
             cell.paragraphs[0].alignment = 1
+            cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E0E0E0"/>'.format(nsdecls('w'))))
             cell = table_obj.cell(0, 2)
             cell.width = Inches(0.5)
             cell.text = "ЕИ"
             cell.paragraphs[0].style = "Normal"
             cell.paragraphs[0].alignment = 1
+            cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E0E0E0"/>'.format(nsdecls('w'))))
             i = 1
             for ind_obj, obj in df_obj_cls.iterrows():
                 cell = table_obj.cell(i, 0)
@@ -112,7 +116,8 @@ def create_docx(data_js):
                 cell.text = obj["FNAME"]
                 cell = table_obj.cell(i, 2)
                 cell.width = Inches(0.5)
-                cell.text = obj["UMS_CODE"]
+                if obj["UMS_CODE"]:
+                    cell.text = obj["UMS_CODE"]
                 i += 1
             document.add_paragraph().add_run().add_break()
             p = document.add_paragraph(
@@ -134,10 +139,12 @@ def create_docx(data_js):
             cell.text = "Наименование признака"
             cell.paragraphs[0].style = "Normal"
             cell.paragraphs[0].alignment = 1
+            cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E0E0E0"/>'.format(nsdecls('w'))))
             cell = table.cell(0, 1)
             cell.text = "Тип признака"
             cell.paragraphs[0].style = "Normal"
             cell.paragraphs[0].alignment = 1
+            cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E0E0E0"/>'.format(nsdecls('w'))))
             cnt = 1
             for ind_attr, attr in df_attribute_cls.iterrows():
                 cell = table.cell(cnt, 0)
@@ -167,14 +174,17 @@ def create_docx(data_js):
                 cell.text = "Наименование признака"
                 cell.paragraphs[0].style = "Normal"
                 cell.paragraphs[0].alignment = 1
+                cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E0E0E0"/>'.format(nsdecls('w'))))
                 cell = table_vsn.cell(0, 1)
                 cell.text = "Значение"
                 cell.paragraphs[0].style = "Normal"
                 cell.paragraphs[0].alignment = 1
+                cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E0E0E0"/>'.format(nsdecls('w'))))
                 cell = table_vsn.cell(0, 2)
                 cell.text = "Обозначение"
                 cell.paragraphs[0].style = "Normal"
                 cell.paragraphs[0].alignment = 1
+                cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E0E0E0"/>'.format(nsdecls('w'))))
                 j = 1
                 k = 1
                 start_union = 1
@@ -199,26 +209,29 @@ def create_docx(data_js):
                         k += 1
                     j += 1
                 document.add_paragraph().add_run().add_break()
-                p = document.add_paragraph(
-                    "Базовая единица измерения",
-                    style="List Bullet 2"
-                )
-                table_umscls = document.add_table(rows=2, cols=2)
-                table_umscls.style = 'Table Grid'
-                table_umscls.autofit = True
-                # Шапка для таблицы значений признаков
-                cell = table_umscls.cell(0, 0)
-                cell.text = "Наименование "
-                cell.paragraphs[0].style = "Normal"
-                cell.paragraphs[0].alignment = 1
-                cell = table_umscls.cell(0, 1)
-                cell.text = "Обозначение"
-                cell.paragraphs[0].style = "Normal"
-                cell.paragraphs[0].alignment = 1
-                cell = table_umscls.cell(1, 0)
-                cell.text = row["UMS_CODE"]
-                cell = table_umscls.cell(1, 1)
-                cell.text = row["UMS_NAME"]
+                if row["UMS_CODE"]:
+                    p = document.add_paragraph(
+                        "Базовая единица измерения",
+                        style="List Bullet 2"
+                    )
+                    table_umscls = document.add_table(rows=2, cols=2)
+                    table_umscls.style = 'Table Grid'
+                    table_umscls.autofit = True
+                    # Шапка для таблицы значений признаков
+                    cell = table_umscls.cell(0, 0)
+                    cell.text = "Наименование "
+                    cell.paragraphs[0].style = "Normal"
+                    cell.paragraphs[0].alignment = 1
+                    cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E0E0E0"/>'.format(nsdecls('w'))))
+                    cell = table_umscls.cell(0, 1)
+                    cell.text = "Обозначение"
+                    cell.paragraphs[0].style = "Normal"
+                    cell.paragraphs[0].alignment = 1
+                    cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E0E0E0"/>'.format(nsdecls('w'))))
+                    cell = table_umscls.cell(1, 0)
+                    cell.text = row["UMS_NAME"]
+                    cell = table_umscls.cell(1, 1)
+                    cell.text = row["UMS_CODE"]
                 df_okved_cls = df_okved.loc[
                     df_okved["CLS_ID"] == row["CLS_ID"]
                     ][["OKVED_CODE", "OKVED_NAME"]].drop_duplicates()
@@ -236,10 +249,12 @@ def create_docx(data_js):
                     cell.text = "Код класса"
                     cell.paragraphs[0].style = "Normal"
                     cell.paragraphs[0].alignment = 1
+                    cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E0E0E0"/>'.format(nsdecls('w'))))
                     cell = table_okved.cell(0, 1)
                     cell.text = "Наименование класса"
                     cell.paragraphs[0].style = "Normal"
                     cell.paragraphs[0].alignment = 1
+                    cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E0E0E0"/>'.format(nsdecls('w'))))
                     r = 1
                     for ind_okv, okv in df_okved_cls.iterrows():
                         cell = table_okved.cell(r, 0)
