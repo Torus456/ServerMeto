@@ -7,7 +7,7 @@ from email import encoders
 from email.mime.multipart import MIMEMultipart
 
 
-def sendmail(address_mail, subject_mail, text_mail, file_attachment):
+def sendmail(address_mail, subject_mail, text_mail, file_attachment, name_attachment):
     """
     Отправить данные на почту:
     @address_mail - почта
@@ -31,7 +31,7 @@ def sendmail(address_mail, subject_mail, text_mail, file_attachment):
     msg['Subject'] = Header(subject_mail, 'utf-8')
     msg['From'] = DEFAULT_FROM_EMAIL
     msg['To'] = ','.join(addresses)
-    header = 'Content-Disposition', 'attachment; filename="%s"' % 'Galka_Instruction.docx'
+    header = 'Content-Disposition', 'attachment; filename="%s"' % name_attachment #'Galka_Instruction.docx'
     attachment = MIMEBase('application', "octet-stream")
     try:
         with open(file_to_attach, "rb") as fh:

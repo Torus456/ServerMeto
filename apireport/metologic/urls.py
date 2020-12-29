@@ -5,4 +5,5 @@ app_name = "metologic"
 # app_name will help us do a reverse look-up latter.
 urlpatterns = [
     url('metodologic', views.create_metodologic, name='create-metodologic'),
+    url('methodology', views.create_methodology, name='create-methodology'),
 ]
