@@ -41,6 +41,7 @@ def create_docx_with_tepmplate(data_js):
     sql_path = settings.BASE_DIR + "\\supp\\sqlscript\\63"
     docs_path = settings.BASE_DIR + "\\supp\\word_template\\" + "63.docx"
     con = cx_Oracle.connect('CS_ART/CS_ART@192.168.54.17:1521/ORA5.INCON.LO')
+    print(data_js)
     result = {}
     project_args = {
         "MLT_ID": data_js.get("project_args").get("mlt_id"),
@@ -63,9 +64,10 @@ def create_docx_with_tepmplate(data_js):
     # Классы, признаки, значения, объекты, оквед
     df_cls = fill_dataframe(sql_path, 'cls_for_doc.sql', con, project_args)
     df_dvs = fill_dataframe(sql_path, 'dvs_for_doc.sql', con, project_args)
-    df_vsn = fill_dataframe(sql_path, 'vsn_for_doc.sql', con, project_args_obj)
+    df_vsn = fill_dataframe(sql_path, 'vsn_for_doc2.sql', con, project_args_obj)
     df_obj = fill_dataframe(sql_path, 'obj_for_doc.sql', con, project_args_obj)
     df_okved = fill_dataframe(sql_path, 'okved_for_doc.sql', con, project_args_obj)
+    print(data_js)
     document = docx.Document(docs_path)
     for index, row in df_cls.iterrows():
         code = "XXX" if row["CODE"] is None else row["CODE"]
@@ -127,15 +129,18 @@ def create_docx_with_tepmplate(data_js):
             # выбираем признаки для класса
             df_attribute_cls = df_dvs.loc[df_dvs["CLS_ID"] == row["CLS_ID"]]
             rows = len(df_attribute_cls)
-            table = document.add_table(rows=rows+1, cols=2)
+            table = document.add_table(rows=rows+1, cols=3)
             table.style = 'Table Grid'
             table.autofit = True
             # Шапка для таблицы признаков
             cell = table.cell(0, 0)
-            cell.text = "Наименование признака"
+            cell.text = "Наименование атрибута"
             set_color_cell_header(cell, "Normal")
             cell = table.cell(0, 1)
-            cell.text = "Тип признака"
+            cell.text = "Тип атрибута"
+            set_color_cell_header(cell, "Normal")
+            cell = table.cell(0, 2)
+            cell.text = "ЕИ"
             set_color_cell_header(cell, "Normal")
             cnt = 1
             for ind_attr, attr in df_attribute_cls.iterrows():
@@ -143,6 +148,9 @@ def create_docx_with_tepmplate(data_js):
                 cell.text = attr["NAME"]
                 cell = table.cell(cnt, 1)
                 cell.text = attr["VALTYPE"]
+                cell = table.cell(cnt, 2)
+                if attr["UMS_CODE"]:
+                    cell.text = attr["UMS_CODE"]
                 cnt += 1
             # Значения признаков
             df_vsn_cls = df_vsn.loc[df_vsn["CLS_ID"] == row["CLS_ID"]]
@@ -163,7 +171,7 @@ def create_docx_with_tepmplate(data_js):
                 table_vsn.autofit = True
                 # Шапка для таблицы значений признаков
                 cell = table_vsn.cell(0, 0)
-                cell.text = "Наименование признака"
+                cell.text = "Наименование атрибута"
                 set_color_cell_header(cell, "Normal")
                 cell = table_vsn.cell(0, 1)
                 cell.text = "Значение"
@@ -174,7 +182,7 @@ def create_docx_with_tepmplate(data_js):
                 j = 1
                 k = 1
                 start_union = 1
-                union_name = "Наименование признака"
+                union_name = "Наименование атрибута"
                 for ind_vsn, vsn in df_vsn_cls.iterrows():
                     cell = table_vsn.cell(j, 0)
                     cell.text = vsn["NAME"]
@@ -200,27 +208,32 @@ def create_docx_with_tepmplate(data_js):
                         "Базовая единица измерения",
                         style="List Bullet 2"
                     )
-                    table_umscls = document.add_table(rows=2, cols=2)
+                    table_umscls = document.add_table(rows=2, cols=3)
                     table_umscls.style = 'Table Grid'
                     table_umscls.autofit = True
                     # Шапка для таблицы значений признаков
                     cell = table_umscls.cell(0, 0)
-                    cell.text = "Наименование "
+                    cell.text = "Код ОКЕИ"
                     set_color_cell_header(cell, "Normal")
                     cell = table_umscls.cell(0, 1)
+                    cell.text = "Наименование "
+                    set_color_cell_header(cell, "Normal")
+                    cell = table_umscls.cell(0, 2)
                     cell.text = "Обозначение"
                     set_color_cell_header(cell, "Normal")
                     cell = table_umscls.cell(1, 0)
-                    cell.text = row["UMS_NAME"]
+                    cell.text = row["UMS_ID"]
                     cell = table_umscls.cell(1, 1)
+                    cell.text = row["UMS_NAME"]
+                    cell = table_umscls.cell(1, 2)
                     cell.text = row["UMS_CODE"]
                 df_okved_cls = df_okved.loc[
                     df_okved["CLS_ID"] == row["CLS_ID"]
                     ][["OKVED_CODE", "OKVED_NAME"]].drop_duplicates()
                 if len(df_okved_cls) > 0:
-                    document.add_paragraph().add_run().add_break()
+                    document.add_paragraph().add_run()
                     p = document.add_paragraph(
-                        "Общероссийский классификатор видов экономической деятельности (ОКВЭД2)",
+                        "Общероссийский классификатор видов экономической деятельности (ОКВЭД 2)",
                         style="List Bullet 2"
                     )
                     table_okved = document.add_table(rows=len(df_okved_cls) + 1, cols=2)
@@ -246,7 +259,7 @@ def create_docx_with_tepmplate(data_js):
                 if len(df_okved_cls) > 0:
                     document.add_paragraph().add_run()
                     p = document.add_paragraph(
-                        "Общероссийский классификатор видов экономической деятельности, продукции и услуг (ОКДП2)",
+                        "Общероссийский классификатор продукции по видам экономической деятельности (ОКПД 2)",
                         style="List Bullet 2"
                     )
                     table_okved = document.add_table(rows=len(df_okdp_cls) + 1, cols=2)
@@ -268,7 +281,7 @@ def create_docx_with_tepmplate(data_js):
                         r += 1
                 df_lot_cls = df_okved.loc[
                     df_okved["CLS_ID"] == row["CLS_ID"]
-                    ][["LOT_CODE"]].drop_duplicates().dropna()
+                    ][["LOT_CODE"]].drop_duplicates().dropna().head(1)
                 if len(df_lot_cls) > 0:
                     document.add_paragraph().add_run()
                     p = document.add_paragraph(
@@ -292,7 +305,7 @@ def create_docx_with_tepmplate(data_js):
                     str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) +
                     ".docx"
                 )
-    document.save(path_file)    
+    document.save(path_file)
     result["path_file"] = path_file
     result["name"] = df_cls["CODE"].iloc[0]
     return result

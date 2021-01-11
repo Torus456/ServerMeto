@@ -43,7 +43,7 @@ select bcls.mlt_id,
 			                   1) 
 	   else null end sname,*/
        case when isleaf = 1 then 
-       		gen_shbl_cls_pp2(bcls.cfv_id, bcls.mlt_id, bcls.clf_id, bcls.cls_id, nmpp.name, 1) 
+       		 sp_acceptor.return_templates_decoded2(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id, 'name', 1)
 	       	 /*sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id,0) */
 	   else null end sname,
 	   case when isleaf = 1 then
@@ -53,6 +53,7 @@ select bcls.mlt_id,
 		   else null end ums_code,
 	   case when isleaf = 1 then ums.name
 	    else null end ums_name,
+	  to_char(ums.ums_id) ums_id,
 	  :prj_id prj_id,
 	  :cst_id cst_id
 from bcls, nmpp, cum, ums 

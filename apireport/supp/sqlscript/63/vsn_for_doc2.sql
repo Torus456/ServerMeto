@@ -109,7 +109,30 @@ where bsdv.mlt_id = zdvs.mlt_id (+)
   and bsdv.cls_id = zdvs.root_cls (+)
   and bsdv.sgn_id = zdvs.root_sgn (+)
   and bsdv.dvs_id = zdvs.root_dvs (+))
-select distinct  bsdv.mlt_id,
+select  mlt_id,
+        clf_id,
+        cls_id,
+        cfv_id,
+        cls_code,
+        cls_name,
+        prj_id,
+        sgn_id,
+        dvs_id,
+        code,
+        name,
+        ord,
+        valtype, 
+        case when vsn_id = 0 then symsgn
+             when valtype = 0 then to_char(sp_acceptor.return_values2 (mlt_id, clf_id, cls_id, prj_id, dvs_id, sgn_id, vsn_id, 0, 1))
+             else replace(regexp_replace(to_char(valnum), '^\.', '0.'), '.', ',') 
+        end value,
+        to_char(sp_acceptor.return_values2 (mlt_id, clf_id, cls_id, prj_id, dvs_id, sgn_id, vsn_id, 1, 1)) symsgn,        
+        inclf_id,
+        cst_id,
+        aobj_id,
+        dop
+from 
+(select distinct  bsdv.mlt_id,
         bsdv.clf_id,
         bsdv.cls_id,
         bsdv.cfv_id,
@@ -120,18 +143,17 @@ select distinct  bsdv.mlt_id,
         bsdv.dvs_id,
         bsdv.code,
         bsdv.name,
-        bsdv.ord,
-        bsdv.valtype, 
-        case when vsn.vsn_id = 0 then vsn.symsgn
-             when bsdv.valtype = 0 then to_char(sp_acceptor.return_values2 (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id, 0, 1))
-             else replace(regexp_replace(to_char(vsn.valnum), '^\.', '0.'), '.', ',') 
-        end value,
-        to_char(sp_acceptor.return_values2 (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id, 1, 1)) symsgn,        
+        bsdv.valtype,
+        vsn.vsn_id,
+        vsn.valnum,
+        vsn.valchar,
+        vsn.symsgn,
+        bsdv.ord,  
         :inclf_id inclf_id,
-        :cst_id,
-        :aobj_id,
+        :cst_id cst_id,
+        :aobj_id aobj_id,
         case when vsn.vsn_id = 0 then 9999999
-             when bsdv.valtype = 1 then vsn.valnum
+             when bsdv.valtype = 1 then valnum
              else 1
         end dop  
 from bsdv, 
@@ -160,7 +182,8 @@ where bsdv.mlt_id = xdvs.mlt_id
   and xdvs.sgn_id = vso.sgn_id
   and ocl.clf_id = :inclf_id
   and ocl.mlt_id = obj.mlt_id
-  and ocl.obj_id = obj.obj_id
+  and ocl.obj_id = obj.obj_id  
+  and obj.cst_id <> 465
   and ocl.mlt_id = oclp.mlt_id
   and ocl.clf_id = oclp.clf_id
   and ocl.cls_id = oclp.cls_id
@@ -184,20 +207,19 @@ select distinct  bsdv.mlt_id,
         bsdv.dvs_id,
         bsdv.code,
         bsdv.name,
-        bsdv.ord,
         bsdv.valtype,
-        case when vsn.vsn_id = 0 then vsn.symsgn
-             when bsdv.valtype = 0 then to_char(sp_acceptor.return_values2 (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id, 0, 1))
-             else replace(regexp_replace(to_char(vsn.valnum), '^\.', '0.'), '.', ',') 
-        end value,
-        to_char(sp_acceptor.return_values2 (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id, 1, 1)) symsgn,
+        vsn.vsn_id,
+        vsn.valnum,
+        vsn.valchar,
+        vsn.symsgn,
+        bsdv.ord,  
         :inclf_id inclf_id,
         :cst_id,
         :aobj_id,
         case when vsn.vsn_id = 0 then 9999999
-             when bsdv.valtype = 1 then vsn.valnum
+             when bsdv.valtype = 1 then valnum
              else 1
-        end dop        
+        end dop       
 from bsdv, 
      xdvs, 
      obj,
@@ -225,6 +247,7 @@ where bsdv.mlt_id = xdvs.mlt_id
   and ocl.clf_id = 6
   and ocl.mlt_id = obj.mlt_id
   and ocl.obj_id = obj.obj_id
+  and obj.cst_id <> 465
   and obj.prj_id = bsdv.prj_id
   and ocl.mlt_id = oclp.mlt_id
   and ocl.clf_id = oclp.clf_id
@@ -240,5 +263,5 @@ where bsdv.mlt_id = xdvs.mlt_id
                     and oclin.clf_id = :inclf_id)
   and vso.mlt_id = vsn.mlt_id
   and vso.sgn_id = vsn.sgn_id
-  and vso.vsn_id = vsn.vsn_id
+  and vso.vsn_id = vsn.vsn_id)
 order by cls_code, ord, dop

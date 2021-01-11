@@ -66,15 +66,17 @@ select distinct
        sdv.code,
        sdv.name,
        sdv.ord,
+       case when sgn.valtype = 1 then ums.code else null end ums_code,
        case when sgn.valtype = 0 then 'Текстовый' 
 			else 'Числовой' end valtype,
 	  :cst_id
-from nclv b, sdv, sgn 
+from nclv b, sdv, sgn, ums 
 where b.mlt_id = sdv.mlt_id 
   and b.clf_id = sdv.clf_id 
   and b.cls_id = sdv.cls_id
   and b.cfv_id = sdv.cfv_id
   and sdv.mlt_id = sgn.mlt_id
   and sdv.sgn_id = sgn.sgn_id
+  and sgn.ums_id = ums.ums_id (+)
   and regexp_like(b.nfname,'{([^[{]*)\[&?'||sdv.dvs_id|| '\]')
 order by b.code, sdv.ord
