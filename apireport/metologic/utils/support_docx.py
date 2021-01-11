@@ -38,8 +38,8 @@ def create_docx_with_tepmplate(data_js):
     Собираем методику с шаблоном
     """
     os.environ["NLS_LANG"] = '.AL32UTF8'
-    sql_path = settings.BASE_DIR + "\\supp\\sqlscript\\63"
-    docs_path = settings.BASE_DIR + "\\supp\\word_template\\" + "63.docx"
+    sql_path = settings.BASE_DIR + "/supp/sqlscript/63"
+    docs_path = settings.BASE_DIR + "/supp/word_template/" + "63.docx"
     con = cx_Oracle.connect('CS_ART/CS_ART@192.168.54.17:1521/ORA5.INCON.LO')
     print(data_js)
     result = {}
@@ -299,7 +299,7 @@ def create_docx_with_tepmplate(data_js):
 
     path_file = (
                     settings.BASE_DIR +
-                    "\\upload\\Metodika_" +
+                    "/upload/Metodika_" +
                     project_args.get("CLS_ID") +
                     "_" +
                     str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) +
@@ -316,7 +316,7 @@ def create_docx(data_js):
     Создаем методику по фрагменту
     """
     os.environ["NLS_LANG"] = '.AL32UTF8'
-    sql_path = settings.BASE_DIR + "\\supp\\sqlscript\\metologic"
+    sql_path = settings.BASE_DIR + "/supp/sqlscript/metologic"
     con = cx_Oracle.connect('CS_ART/CS_ART@192.168.54.17:1521/ORA5.INCON.LO')
     result = {}
     project_args = {
@@ -533,7 +533,7 @@ def create_docx(data_js):
 
     path_file = (
                     settings.BASE_DIR +
-                    "\\upload\\Metodika_" +
+                    "/upload/Metodika_" +
                     project_args.get("CLS_ID") +
                     "_" +
                     str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) +

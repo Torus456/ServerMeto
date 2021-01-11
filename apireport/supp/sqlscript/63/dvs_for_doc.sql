@@ -67,8 +67,8 @@ select distinct
        sdv.name,
        sdv.ord,
        case when sgn.valtype = 1 then ums.code else null end ums_code,
-       case when sgn.valtype = 0 then 'Текстовый' 
-			else 'Числовой' end valtype,
+       case when sgn.valtype = 0 then 'РўРµРєСЃС‚РѕРІС‹Р№' 
+			else 'Р§РёСЃР»РѕРІРѕР№' end valtype,
 	  :cst_id
 from nclv b, sdv, sgn, ums 
 where b.mlt_id = sdv.mlt_id 
