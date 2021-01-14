@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from supp.views import sendmail
 from .utils.support_docx import create_docx, create_docx_with_tepmplate
+from  metologic.tasks import send_mail, add_task
 
 # Create your views here.
 
@@ -36,4 +37,16 @@ def create_methodology(request):
     result["message"] = "Привет"
     print(name_file)
     sendmail(request_data.get("project_args").get("email"), "subject_mail", "text_mail", path_file, name_file)
+    return JsonResponse(result, status=status)
+
+
+def delay_methodology(request):
+    request_data = json.loads(request.body)
+    print("delay")
+    status = 200
+    result = {}
+    result["message"] = "Привет"
+    task = send_mail.delay(request_data)
+    print(task.id)
+    print(task.status)
     return JsonResponse(result, status=status)

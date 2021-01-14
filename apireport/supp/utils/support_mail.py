@@ -31,6 +31,7 @@ def sendmail(address_mail, subject_mail, text_mail, file_attachment, name_attach
     msg['Subject'] = Header(subject_mail, 'utf-8')
     msg['From'] = DEFAULT_FROM_EMAIL
     msg['To'] = ','.join(addresses)
+    print(name_attachment)
     header = 'Content-Disposition', 'attachment; filename="%s"' % name_attachment #'Galka_Instruction.docx'
     attachment = MIMEBase('application', "octet-stream")
     try:
