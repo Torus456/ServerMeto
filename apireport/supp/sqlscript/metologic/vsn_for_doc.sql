@@ -63,7 +63,8 @@ zdvs as
            dvs.sgn_id,
            dvs.dvs_id,
            dvs.code,
-           dvs.name,           
+           dvs.name,
+           nvl(dvs.multival_sep, ',') multival_sep,           
            connect_by_root (dvs.clf_id) root_clf,
            connect_by_root (dvs.cls_id) root_cls,
            connect_by_root (dvs.sgn_id) root_sgn,
@@ -102,14 +103,16 @@ xdvs as
          bsdv.code,
          bsdv.name,
          bsdv.prj_id,
-         bsdv.ord
+         bsdv.ord,
+         zdvs.multival_sep
 from bsdv, zdvs 
 where bsdv.mlt_id = zdvs.mlt_id (+)
   and bsdv.clf_id = zdvs.root_clf (+)
   and bsdv.cls_id = zdvs.root_cls (+)
   and bsdv.sgn_id = zdvs.root_sgn (+)
-  and bsdv.dvs_id = zdvs.root_dvs (+))
-select distinct  bsdv.mlt_id,
+  and bsdv.dvs_id = zdvs.root_dvs (+)),
+zvsn as 
+(select distinct  bsdv.mlt_id,
         bsdv.clf_id,
         bsdv.cls_id,
         bsdv.cfv_id,
@@ -128,7 +131,9 @@ select distinct  bsdv.mlt_id,
                   end
         end value,
         sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1) symsgn,
-        :inclf_id inclf_id 
+        :inclf_id inclf_id,
+        obj.obj_id,
+        xdvs.multival_sep
 from bsdv, 
      xdvs, 
      obj,
@@ -164,6 +169,10 @@ where bsdv.mlt_id = xdvs.mlt_id
   and oclp.fname||oclp.sname not like '%?%'
   and obj.prj_id = bsdv.prj_id
   and obj.status = 1
+  and exists (select 1 from vobj q 
+              where obj.mlt_id = q.mlt_id
+                and obj.obj_id = q.obj_id
+                and q.aobj_id = 9274)
   and exists (select 1 
              from vobj
              where vobj.aobj_id = :aobj_id
@@ -192,7 +201,9 @@ select distinct  bsdv.mlt_id,
                   end
         end value,
         sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1) symsgn,
-        :inclf_id inclf_id
+        :inclf_id inclf_id,
+        obj.obj_id,
+        xdvs.multival_sep
 from bsdv, 
      xdvs, 
      obj,
@@ -233,6 +244,10 @@ where bsdv.mlt_id = xdvs.mlt_id
                   where ocl.mlt_id = oclin.mlt_id
                     and ocl.obj_id = oclin.obj_id
                     and oclin.clf_id = :inclf_id)
+  and exists (select 1 from vobj q 
+              where obj.mlt_id = q.mlt_id
+                and obj.obj_id = q.obj_id
+                and q.aobj_id = 9274)
   and exists (select 1 
              from vobj
              where vobj.aobj_id = :aobj_id
@@ -240,5 +255,56 @@ where bsdv.mlt_id = xdvs.mlt_id
                and vobj.obj_id = obj.obj_id)
   and vso.mlt_id = vsn.mlt_id
   and vso.sgn_id = vsn.sgn_id
-  and vso.vsn_id = vsn.vsn_id
+  and vso.vsn_id = vsn.vsn_id)
+select distinct q.mlt_id,
+        q.clf_id,
+        q.cls_id,
+        q.cfv_id,
+        q.cls_code,
+        q.cls_name,
+        q.prj_id,
+        q.sgn_id,
+        q.dvs_id,
+        q.code,
+        q.name,
+        q.ord,
+        q.valtype, 
+        q.value,
+        q.symsgn,
+        q.inclf_id
+from 
+(select  zvsn.mlt_id,
+        zvsn.clf_id,
+        zvsn.cls_id,
+        zvsn.cfv_id,
+        zvsn.cls_code,
+        zvsn.cls_name,
+        zvsn.prj_id,
+        zvsn.sgn_id,
+        zvsn.dvs_id,
+        zvsn.code,
+        zvsn.name,
+        zvsn.ord,
+        zvsn.valtype, 
+        LISTAGG(zvsn.value, zvsn.multival_sep) within group (ORDER BY zvsn.value) value,
+        LISTAGG(zvsn.symsgn, zvsn.multival_sep) within group (ORDER BY zvsn.value) symsgn,
+        zvsn.inclf_id,
+        zvsn.obj_id  
+from zvsn
+group by  zvsn.mlt_id,
+        zvsn.clf_id,
+        zvsn.cls_id,
+        zvsn.cfv_id,
+        zvsn.cls_code,
+        zvsn.cls_name,
+        zvsn.prj_id,
+        zvsn.sgn_id,
+        zvsn.dvs_id,
+        zvsn.code,
+        zvsn.name,
+        zvsn.ord,
+        zvsn.valtype,
+        zvsn.inclf_id,
+        zvsn.obj_id,
+        zvsn.multival_sep) q
 order by cls_code, ord

@@ -43,11 +43,10 @@ select bcls.mlt_id,
 			                   1) 
 	   else null end sname,*/
        case when isleaf = 1 then 
-       		gen_shbl_cls_pp2(bcls.cfv_id, bcls.mlt_id, bcls.clf_id, bcls.cls_id, nmpp.sname, 1) 
-	       	 /*sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id,0) */
+       		sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id, 'sname',1)
 	   else null end sname,
 	   case when isleaf = 1 then
-		   sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id,1)
+		    sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id, 'fname',1)
 	   else null end fname,
 	   case when isleaf = 1 then nvl(q.uni_code, ums.code)
 		   else null end ums_code,
