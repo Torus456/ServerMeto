@@ -16,7 +16,8 @@ def fill_dataframe(path, query, connect, project_args):
     Заполнить датафрейм на основе запроса
     """
     SQL_QUERY = ""
-    with open(os.path.join(path, query), 'r') as file:
+    print(query)
+    with open(os.path.join(path, query), 'r', encoding="utf-8") as file:        
         SQL_QUERY = file.read().replace('\n', ' ')
     df = pd.read_sql(SQL_QUERY, con=connect, params=project_args)
     result = df.where((pd.notnull(df)), None)
@@ -38,8 +39,8 @@ def create_docx_with_tepmplate(data_js):
     Собираем методику с шаблоном
     """
     os.environ["NLS_LANG"] = '.AL32UTF8'
-    sql_path = settings.BASE_DIR + "\\supp\\sqlscript\\63"
-    docs_path = settings.BASE_DIR + "\\supp\\word_template\\" + "63.docx"
+    sql_path = settings.BASE_DIR + "/supp/sqlscript/63"
+    docs_path = settings.BASE_DIR + "/supp/word_template/" + "63.docx"
     con = cx_Oracle.connect('CS_ART/CS_ART@192.168.54.17:1521/ORA5.INCON.LO')
     print(data_js)
     result = {}
@@ -299,7 +300,7 @@ def create_docx_with_tepmplate(data_js):
 
     path_file = (
                     settings.BASE_DIR +
-                    "\\upload\\Metodika_" +
+                    "/upload/Metodika_" +
                     project_args.get("CLS_ID") +
                     "_" +
                     str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) +
@@ -316,7 +317,7 @@ def create_docx(data_js):
     Создаем методику по фрагменту
     """
     os.environ["NLS_LANG"] = '.AL32UTF8'
-    sql_path = settings.BASE_DIR + "\\supp\\sqlscript\\metologic"
+    sql_path = settings.BASE_DIR + "/supp/sqlscript/metologic"
     con = cx_Oracle.connect('CS_ART/CS_ART@192.168.54.17:1521/ORA5.INCON.LO')
     result = {}
     project_args = {
@@ -341,6 +342,7 @@ def create_docx(data_js):
     df_vsn = fill_dataframe(sql_path, 'vsn_for_doc.sql', con, project_args_obj)
     df_obj = fill_dataframe(sql_path, 'obj_for_doc.sql', con, project_args_obj)
     df_okved = fill_dataframe(sql_path, 'okved_for_doc.sql', con, project_args)
+    df_okpd = fill_dataframe(sql_path, 'okpd_for_doc.sql', con, project_args)
     document = docx.Document()
     # document.add_heading('Методика', 0)
     # Формируем для создания иерархии
@@ -528,12 +530,42 @@ def create_docx(data_js):
                         cell = table_okved.cell(r, 1)
                         cell.text = okv["OKVED_NAME"]
                         r += 1
+                
+                df_okpd_cls = df_okpd.loc[
+                    df_okpd["CLS_ID"] == row["CLS_ID"]
+                    ][["OKVED_CODE", "OKVED_NAME"]].drop_duplicates()
+                
+                if len(df_okpd_cls) > 0:
+                    print(row["CLS_ID"])
+                    print(df_okpd_cls.head())
+                    document.add_paragraph().add_run().add_break()
+                    p = document.add_paragraph(
+                        "Общероссийский классификатор продукции (ОКПД2)",
+                        style="List Bullet 2"
+                    )
+                    table_okpd = document.add_table(rows=len(df_okpd_cls) + 1, cols=2)
+                    table_okpd.style = 'Table Grid'
+                    table_okpd.autofit = True
+                    # Шапка для таблицы классов ОКВЕД2
+                    cell = table_okpd.cell(0, 0)
+                    cell.text = "Код класса"
+                    set_color_cell_header(cell, "Normal")
+                    cell = table_okpd.cell(0, 1)
+                    cell.text = "Наименование класса"
+                    set_color_cell_header(cell, "Normal")
+                    r = 1
+                    for ind_okp, okp in df_okpd_cls.iterrows():
+                        cell = table_okpd.cell(r, 0)
+                        cell.text = okp["OKVED_CODE"]
+                        cell = table_okpd.cell(r, 1)
+                        cell.text = okp["OKVED_NAME"]
+                        r += 1
         if row["SNAME"]:
             document.add_page_break()
 
     path_file = (
                     settings.BASE_DIR +
-                    "\\upload\\Metodika_" +
+                    "/upload/Metodika_" +
                     project_args.get("CLS_ID") +
                     "_" +
                     str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) +
@@ -541,5 +573,5 @@ def create_docx(data_js):
                 )
     document.save(path_file)
     result["path_file"] = path_file
-    result["name"] = df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
+    result["name"] = "Hello"#df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
     return result

@@ -155,7 +155,8 @@ from
         case when vsn.vsn_id = 0 then 9999999
              when bsdv.valtype = 1 then valnum
              else 1
-        end dop  
+        end dop,
+        dense_rank() over (partition by bsdv.cls_code, bsdv.cls_name, bsdv.sgn_id, bsdv.dvs_id order by vsn.vsn_id) rn 
 from bsdv, 
      xdvs, 
      obj,
@@ -219,7 +220,8 @@ select distinct  bsdv.mlt_id,
         case when vsn.vsn_id = 0 then 9999999
              when bsdv.valtype = 1 then valnum
              else 1
-        end dop       
+        end dop,
+        dense_rank() over (partition by bsdv.cls_code, bsdv.cls_name, bsdv.sgn_id, bsdv.dvs_id order by vsn.vsn_id) rn       
 from bsdv, 
      xdvs, 
      obj,
@@ -264,4 +266,5 @@ where bsdv.mlt_id = xdvs.mlt_id
   and vso.mlt_id = vsn.mlt_id
   and vso.sgn_id = vsn.sgn_id
   and vso.vsn_id = vsn.vsn_id)
+where rn < 25
 order by cls_code, ord, dop

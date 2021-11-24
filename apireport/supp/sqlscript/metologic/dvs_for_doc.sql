@@ -67,9 +67,9 @@ select distinct
        sdv.name,
        sdv.ord,
        nvl( q.chislovojtekstovyj,
-       		case when sgn.valtype = 0 then 'Текстовый' 
-			when up_zhaikmuhay.get_type_dvs_pp(sdv.mlt_id, sdv.clf_id, sdv.cls_id, sdv.sgn_id, sdv.dvs_id, :prj_id) = 1 then 'Текстовый' 
-			else 'Числовой' end) valtype     
+       		case when sgn.valtype = 0 then 'РўРµРєСЃС‚РѕРІС‹Р№' 
+			when up_zhaikmuhay.get_type_dvs_pp(sdv.mlt_id, sdv.clf_id, sdv.cls_id, sdv.sgn_id, sdv.dvs_id, :prj_id) = 1 then 'РўРµРєСЃС‚РѕРІС‹Р№' 
+			else 'Р§РёСЃР»РѕРІРѕР№' end) valtype     
 from nclv b, sdv, sgn, cs_art_load.uni_dvs_done_all q 
 where b.mlt_id = sdv.mlt_id 
   and b.clf_id = sdv.clf_id 
