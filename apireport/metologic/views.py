@@ -4,8 +4,6 @@ from django.http import JsonResponse
 from supp.views import sendmail
 from .utils.support_docx import create_docx, create_docx_with_tepmplate
 
-# Create your views here.
-
 
 def create_metodologic(request):
     '''
