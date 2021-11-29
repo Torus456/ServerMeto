@@ -2,7 +2,7 @@ import json
 from django.shortcuts import render
 from django.http import JsonResponse
 from supp.views import sendmail
-from .utils.support_docx import create_docx, create_docx_with_tepmplate
+from .utils.support_docx import create_docx, create_docx_with_tepmplate, create_docx64
 from  metologic.tasks import send_mail, add_task
 
 
@@ -12,7 +12,7 @@ def create_metodologic(request):
     '''
     request_data = json.loads(request.body)
     print(request_data)
-    res = create_docx(request_data)
+    res = create_docx64(request_data)
     path_file = res.get("path_file")
     name_file = res.get("name")
     status = 200

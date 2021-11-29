@@ -10,7 +10,8 @@ with bcls as
        prj.prj_id,
        prj.name project_name,
        connect_by_isleaf isleaf,
-       level clv_lev
+       level clv_lev,
+       clv.descr
 from clv, cfv, prj
 where clv.cfv_id = cfv.cfv_id
   and prj.prj_id = cfv.prj_id
@@ -42,17 +43,18 @@ select bcls.mlt_id,
 			                   nmpp.sname,
 			                   1) 
 	   else null end sname,*/
-       case when isleaf = 1 then 
+      case when isleaf = 1 then 
        		sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id, 'sname',1)
-	   else null end sname,
-	   case when isleaf = 1 then
+	    else null end sname,
+	    case when isleaf = 1 then
 		    sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id, 'fname',1)
-	   else null end fname,
-	   case when isleaf = 1 then nvl(q.uni_code, ums.code)
-		   else null end ums_code,
-	   case when isleaf = 1 then nvl(q.uni_name, ums.name)
+	    else null end fname,
+	    case when isleaf = 1 then nvl(q.uni_code, ums.code)
+		  else null end ums_code,
+	    case when isleaf = 1 then nvl(q.uni_name, ums.name)
 	    else null end ums_name,
-	  :prj_id prj_id
+      bcls.descr,
+	    :prj_id prj_id
 from bcls, nmpp, cum, cs_art_load.uni_ums q, ums 
 where bcls.mlt_id = nmpp.mlt_id (+) 
   and bcls.clf_id = nmpp.clf_id (+)

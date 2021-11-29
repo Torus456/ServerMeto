@@ -169,10 +169,6 @@ where bsdv.mlt_id = xdvs.mlt_id
   and oclp.fname||oclp.sname not like '%?%'
   and obj.prj_id = bsdv.prj_id
   and obj.status = 1
-  and exists (select 1 from vobj q 
-              where obj.mlt_id = q.mlt_id
-                and obj.obj_id = q.obj_id
-                and q.aobj_id = 9274)
   and exists (select 1 
              from vobj
              where vobj.aobj_id = :aobj_id
@@ -244,10 +240,6 @@ where bsdv.mlt_id = xdvs.mlt_id
                   where ocl.mlt_id = oclin.mlt_id
                     and ocl.obj_id = oclin.obj_id
                     and oclin.clf_id = :inclf_id)
-  and exists (select 1 from vobj q 
-              where obj.mlt_id = q.mlt_id
-                and obj.obj_id = q.obj_id
-                and q.aobj_id = 9274)
   and exists (select 1 
              from vobj
              where vobj.aobj_id = :aobj_id

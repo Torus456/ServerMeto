@@ -69,8 +69,10 @@ select distinct
        nvl( q.chislovojtekstovyj,
        		case when sgn.valtype = 0 then 'Текстовый' 
 			when up_zhaikmuhay.get_type_dvs_pp(sdv.mlt_id, sdv.clf_id, sdv.cls_id, sdv.sgn_id, sdv.dvs_id, :prj_id) = 1 then 'Текстовый' 
-			else 'Числовой' end) valtype     
-from nclv b, sdv, sgn, cs_art_load.uni_dvs_done_all q 
+			else 'Числовой' end) 
+      ||  case when sd.od_klassa is not null then '(Не обязательный)' 
+      else null end valtype     
+from nclv b, sdv, sgn, cs_art_load.uni_dvs_done_all q, cs_art_load.sinara_dontneed sd
 where b.mlt_id = sdv.mlt_id 
   and b.clf_id = sdv.clf_id 
   and b.cls_id = sdv.cls_id
@@ -80,6 +82,8 @@ where b.mlt_id = sdv.mlt_id
   and sdv.cls_id = q.cls_id (+)
   and sdv.sgn_id = q.sgn_id (+)
   and sdv.dvs_id = q.dvs_id (+)
+  and sdv.cls_id = sd.id_klassa (+)
+  and sdv.name = sd.od_klassa (+)
   and sdv.mlt_id = sgn.mlt_id
   and sdv.sgn_id = sgn.sgn_id
   and regexp_like(b.nfname,'{([^[{]*)\[&?'||sdv.dvs_id|| '\]')

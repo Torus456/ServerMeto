@@ -49,7 +49,7 @@ as (SELECT *
   connect by       prior mlt_id = mlt_id
                and prior clf_id = clf_id
                and prior cls_id = cls_cls_id) a
-                WHERE gen_shbl_dvs_sgn(a.mlt_id,a.clf_id,a.cls_id,62,1) = gen_shbl_dvs_sgn(a.mlt_id,a.root_clf,a.root_cls,62,1)),                                                    
+                WHERE gen_shbl_dvs_sgn(a.mlt_id,a.clf_id,a.cls_id,:prj_id,1) = gen_shbl_dvs_sgn(a.mlt_id,a.root_clf,a.root_cls,:prj_id,1)),                                                    
 xcls
 as (select   b.mlt_id,
              nvl (z.clf_id, b.clf_id) as clf_id,
@@ -69,7 +69,7 @@ as (select   b.mlt_id,
              and b.mlt_id = cum.mlt_id (+)
 		     and b.clf_id = cum.clf_id (+)
 		     and b.cls_id = cum.cls_id (+) 
-		     and cum.cst_id (+) = 466
+		     and cum.cst_id (+) = 472
 		     and cum.ums_id = q.ums_id (+)
 		     )
 select distinct xcls.mlt_id, 
@@ -100,12 +100,8 @@ where xcls.mlt_id = ocl.mlt_id
   and obj.mlt_id = oum.mlt_id (+)
   and obj.obj_id = oum.obj_id (+)
   and obj.prj_id = oum.prj_id (+)
-  and oum.cst_id (+) = 466
+  and oum.cst_id (+) = 472
   and oum.ums_id = q.ums_id (+)
-  and exists (select 1 from vobj q 
-              where obj.mlt_id = q.mlt_id
-                and obj.obj_id = q.obj_id
-                and q.aobj_id = 9274)
   and exists (select 1 from vobj 
               where obj.mlt_id = vobj.mlt_id
                 and obj.obj_id = vobj.obj_id
@@ -144,13 +140,9 @@ where xcls.mlt_id = ocl.mlt_id
   and obj.mlt_id = oum.mlt_id (+)
   and obj.obj_id = oum.obj_id (+)
   and obj.prj_id = oum.prj_id (+)
-  and oum.cst_id (+) = 466
+  and oum.cst_id (+) = 472
   and oum.ums_id = ums.ums_id (+) 
   and oum.ums_id = q.ums_id (+)
-  and exists (select 1 from vobj q 
-              where obj.mlt_id = q.mlt_id
-                and obj.obj_id = q.obj_id
-                and q.aobj_id = 9274)
   and exists (select 1 from vobj 
               where obj.mlt_id = vobj.mlt_id
                 and obj.obj_id = vobj.obj_id
