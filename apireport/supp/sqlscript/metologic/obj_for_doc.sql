@@ -60,18 +60,18 @@ as (select   b.mlt_id,
              b.name,
              b.list,
              b.prj_id,
-             q.uni_code ums_code,
-             q.uni_name ums_name
-      from   bcls b, zcls z, cum, cs_art_load.uni_ums q
+             ums.code ums_code,
+             ums.name ums_name
+      from   bcls b, zcls z, cum, ums
      where       b.mlt_id = z.mlt_id(+)
              and b.clf_id = z.root_clf(+)
              and b.cls_id = z.root_cls(+)
              and b.mlt_id = cum.mlt_id (+)
-		     and b.clf_id = cum.clf_id (+)
-		     and b.cls_id = cum.cls_id (+) 
-		     and cum.cst_id (+) = 472
-		     and cum.ums_id = q.ums_id (+)
-		     )
+		and b.clf_id = cum.clf_id (+)
+		and b.cls_id = cum.cls_id (+) 
+		and cum.cst_id (+) = 472
+		and cum.ums_id = ums.ums_id (+)                  
+              and cum.status (+) <> 2)
 select distinct xcls.mlt_id, 
        xcls.clf_id_pp clf_id, 
        xcls.cls_id_pp cls_id,
@@ -79,9 +79,9 @@ select distinct xcls.mlt_id,
        xcls.name,
        oclp.sname,
        oclp.fname,
-       nvl(q.uni_code, xcls.ums_code) ums_code,
-       nvl(q.uni_name, xcls.ums_name) ums_name
-from xcls, ocl, obj, oclp, oum, cs_art_load.uni_ums q
+       nvl(q.code, xcls.ums_code) ums_code,
+       nvl(q.name, xcls.ums_name) ums_name
+from xcls, ocl, obj, oclp, oum, ums q
 where xcls.mlt_id = ocl.mlt_id
   and xcls.clf_id = ocl.clf_id
   and xcls.cls_id = ocl.cls_id
@@ -114,9 +114,9 @@ select distinct xcls.mlt_id,
        xcls.name,
        oclp.sname,
        oclp.fname,
-       nvl(nvl(q.uni_code, ums.code), xcls.ums_code) ums_code,
-       nvl(nvl(q.uni_name, ums.name), xcls.ums_name) ums_name
-from xcls, ocl, obj, oclp, oum, cs_art_load.uni_ums q, ums
+       nvl( ums.code, xcls.ums_code) ums_code,
+       nvl( ums.name, xcls.ums_name) ums_name
+from xcls, ocl, obj, oclp, oum, ums
 where xcls.mlt_id = ocl.mlt_id
   and xcls.clf_id = ocl.clf_id
   and xcls.cls_id = ocl.cls_id
@@ -141,8 +141,7 @@ where xcls.mlt_id = ocl.mlt_id
   and obj.obj_id = oum.obj_id (+)
   and obj.prj_id = oum.prj_id (+)
   and oum.cst_id (+) = 472
-  and oum.ums_id = ums.ums_id (+) 
-  and oum.ums_id = q.ums_id (+)
+  and oum.ums_id = ums.ums_id (+)
   and exists (select 1 from vobj 
               where obj.mlt_id = vobj.mlt_id
                 and obj.obj_id = vobj.obj_id

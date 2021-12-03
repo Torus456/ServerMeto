@@ -18,7 +18,8 @@ def create_metodologic(request):
     status = 200
     result = {}
     result["message"] = "Привет"
-    sendmail(request_data.get("project_args").get("email"), "subject_mail", "text_mail", path_file, name_file)
+    print(name_file)
+    sendmail(request_data.get("project_args").get("email"), "Методика", "text_mail", path_file, name_file)
     return JsonResponse(result, status=status)
 
 
@@ -34,7 +35,7 @@ def create_methodology(request):
     result = {}
     result["message"] = "Привет"
     print(name_file)
-    sendmail(request_data.get("project_args").get("email"), "subject_mail", "text_mail", path_file, name_file)
+    sendmail(request_data.get("project_args").get("email"), "subject_mail", "text_mail", path_file, str(name_file))
     return JsonResponse(result, status=status)
 
 
