@@ -63,7 +63,7 @@ where bcls.mlt_id = nmpp.mlt_id (+)
   and bcls.mlt_id = cum.mlt_id (+)
   and bcls.clf_id = cum.clf_id (+) 
   and bcls.cls_id = cum.cls_id (+)  
-  and cum.cst_id (+) = 466
+  and cum.cst_id (+) = 472
   and cum.ums_id = q.ums_id (+)
   and cum.ums_id = ums.ums_id (+)
 order by bcls.code
