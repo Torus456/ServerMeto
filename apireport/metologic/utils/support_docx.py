@@ -645,7 +645,7 @@ def create_docx64(data_js):
         footer = section.footer
         if ':КЛАСС:' in footer.tables[0].cell(0, 0).text:
             footer.tables[0].cell(0, 0).text = footer.tables[0].cell(0, 0).text.replace(":КЛАСС:", text_footer)
-
+            footer.tables[0].cell(0, 0).paragraphs[0].alignment = 1
     path_file = (
         settings.BASE_DIR +
         "/upload/Metodika_" +
