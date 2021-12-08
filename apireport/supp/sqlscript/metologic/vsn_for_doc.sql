@@ -131,9 +131,15 @@ zvsn as
                   end
         end value,
         sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1) symsgn,
+         case when vsn.vsn_id = 0 then vsn.symsgn
+             else case when bsdv.valtype = 0 then vsn.valchar
+                       else replace(regexp_replace(to_char(vsn.valnum), '^\.', '0.'), '.', ',') 
+                  end
+        end valchar,
         :inclf_id inclf_id,
         obj.obj_id,
-        xdvs.multival_sep
+        xdvs.multival_sep,
+        vsn.vsn_id
 from bsdv, 
      xdvs, 
      obj,
@@ -197,9 +203,15 @@ select distinct  bsdv.mlt_id,
                   end
         end value,
         sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1) symsgn,
+        case when vsn.vsn_id = 0 then vsn.symsgn
+             else case when bsdv.valtype = 0 then vsn.valchar
+                       else replace(regexp_replace(to_char(vsn.valnum), '^\.', '0.'), '.', ',') 
+                  end
+        end valchar,
         :inclf_id inclf_id,
         obj.obj_id,
-        xdvs.multival_sep
+        xdvs.multival_sep,
+        vsn.vsn_id
 from bsdv, 
      xdvs, 
      obj,
@@ -261,9 +273,15 @@ select distinct q.mlt_id,
         q.name,
         q.ord,
         q.valtype, 
-        q.value,
-        q.symsgn,
-        q.inclf_id
+        case when q.sgn_id = 8222 then q.symsgn
+        else REPLACE(q.value, '<Отсутствует>', '   ')
+        end value,
+        case when q.sgn_id = 8222 then '   '
+             when q.value = q.symsgn then '   '
+             else REPLACE(q.symsgn, '<Отсутствует>', '   ') 
+        end symsgn,
+        q.inclf_id,
+        q.vsn_id
 from 
 (select  zvsn.mlt_id,
         zvsn.clf_id,
@@ -278,8 +296,12 @@ from
         zvsn.name,
         zvsn.ord,
         zvsn.valtype, 
-        LISTAGG(zvsn.value, zvsn.multival_sep) within group (ORDER BY zvsn.value) value,
-        LISTAGG(zvsn.symsgn, zvsn.multival_sep) within group (ORDER BY zvsn.value) symsgn,
+        LISTAGG(zvsn.valchar, zvsn.multival_sep) within group (ORDER BY zvsn.value) value,
+        LISTAGG( case when zvsn.valchar = zvsn.value then zvsn.symsgn
+                      else NVL(zvsn.value,zvsn.symsgn)
+                 end, zvsn.multival_sep
+        ) within group (ORDER BY zvsn.value) symsgn,
+        LISTAGG(zvsn.vsn_id, zvsn.multival_sep) within group (ORDER BY zvsn.vsn_id) vsn_id,
         zvsn.inclf_id,
         zvsn.obj_id  
 from zvsn
@@ -299,4 +321,4 @@ group by  zvsn.mlt_id,
         zvsn.inclf_id,
         zvsn.obj_id,
         zvsn.multival_sep) q
-order by cls_code, ord
+order by cls_code, ord, case when vsn_id like '0%' then null else '1' end, 14

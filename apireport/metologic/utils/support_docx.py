@@ -640,6 +640,11 @@ def create_docx64(data_js):
     for paragraph in document.paragraphs:
         if ':КЛАСС:' in paragraph.text:
             paragraph.text = "Класс: " + df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
+    text_footer = "Класс: " + df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
+    for section in document.sections:
+        footer = section.footer
+        if ':КЛАСС:' in footer.tables[0].cell(0, 0).text:
+            footer.tables[0].cell(0, 0).text = footer.tables[0].cell(0, 0).text.replace(":КЛАСС:", text_footer)
 
     path_file = (
         settings.BASE_DIR +
@@ -795,7 +800,7 @@ def add_object_value(document, df_vsn_cls):
         cell = table_vsn.cell(j, 0)
         cell.text = vsn.NAME
         cell = table_vsn.cell(j, 1)
-        cell.text = vsn.VALUE
+        cell.text = "" if vsn.VALUE is None else vsn.VALUE
         cell = table_vsn.cell(j, 2)
         cell.text = "" if vsn.SYMSGN is None else vsn.SYMSGN
         # объединяем ячейки

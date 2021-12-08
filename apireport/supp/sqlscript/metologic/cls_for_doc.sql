@@ -35,27 +35,19 @@ select bcls.mlt_id,
        bcls.prj_id,
        bcls.project_name,
        bcls.clv_lev,
-       /*case when isleaf = 1 then 
-	       	gen_shbl_cls_pp2(  bcls.cfv_id,
-			                   bcls.mlt_id,
-			                   bcls.clf_id,
-			                   bcls.cls_id,
-			                   nmpp.sname,
-			                   1) 
-	   else null end sname,*/
       case when isleaf = 1 then 
        		sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id, 'sname',1)
 	    else null end sname,
 	    case when isleaf = 1 then
 		    sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id, 'fname',1)
 	    else null end fname,
-	    case when isleaf = 1 then nvl(q.uni_code, ums.code)
+	    case when isleaf = 1 then ums.code
 		  else null end ums_code,
-	    case when isleaf = 1 then nvl(q.uni_name, ums.name)
+	    case when isleaf = 1 then ums.name
 	    else null end ums_name,
       bcls.descr,
 	    :prj_id prj_id
-from bcls, nmpp, cum, cs_art_load.uni_ums q, ums 
+from bcls, nmpp, cum, ums 
 where bcls.mlt_id = nmpp.mlt_id (+) 
   and bcls.clf_id = nmpp.clf_id (+)
   and bcls.cls_id = nmpp.cls_id (+)
@@ -64,6 +56,5 @@ where bcls.mlt_id = nmpp.mlt_id (+)
   and bcls.clf_id = cum.clf_id (+) 
   and bcls.cls_id = cum.cls_id (+)  
   and cum.cst_id (+) = 472
-  and cum.ums_id = q.ums_id (+)
   and cum.ums_id = ums.ums_id (+)
 order by bcls.code
