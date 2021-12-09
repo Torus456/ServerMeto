@@ -1,5 +1,6 @@
 import smtplib
 import sys
+import os
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email.header import Header
@@ -32,14 +33,16 @@ def sendmail(address_mail, subject_mail, text_mail, file_attachment, name_attach
     msg['From'] = DEFAULT_FROM_EMAIL
     msg['To'] = ','.join(addresses)
     name_attachment = name_attachment + ".docx"
-    header = 'Content-Disposition', 'attachment; filename="%s"' % name_attachment #'Galka_Instruction.docx'
+    mail_coding = 'utf-8'
+    att_header = Header(name_attachment, mail_coding)
+    header = 'Content-Disposition', 'attachment; filename="%s"' % att_header.encode('utf-8') #'Galka_Instruction.docx'
     attachment = MIMEBase('application', "octet-stream")
     try:
         with open(file_to_attach, "rb") as fh:
             data = fh.read()
         attachment.set_payload(data)
-        encoders.encode_base64(attachment)
         attachment.add_header(*header)
+        encoders.encode_base64(attachment)
         msg.attach(attachment)
     except IOError:
         msg = "Error opening attachment file %s" % file_to_attach

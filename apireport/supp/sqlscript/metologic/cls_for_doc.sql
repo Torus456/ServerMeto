@@ -56,5 +56,6 @@ where bcls.mlt_id = nmpp.mlt_id (+)
   and bcls.clf_id = cum.clf_id (+) 
   and bcls.cls_id = cum.cls_id (+)  
   and cum.cst_id (+) = 472
+  and cum.status (+) <> 2
   and cum.ums_id = ums.ums_id (+)
 order by bcls.code
