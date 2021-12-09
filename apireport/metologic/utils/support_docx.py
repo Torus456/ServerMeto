@@ -730,6 +730,7 @@ def add_project_name(document, df_obj_cls):
     """
     Добавляем проектные наименования и ЕИ
     """
+    df_obj_cls = df_obj_cls.sort_values(by="SNAME")
     document.add_paragraph(
         "Примеры наименований",
         style="List Bullet 2"

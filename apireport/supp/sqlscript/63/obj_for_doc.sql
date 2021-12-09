@@ -144,4 +144,4 @@ where xcls.mlt_id = ocl.mlt_id
               where obj.mlt_id = vobj.mlt_id
                 and obj.obj_id = vobj.obj_id
                 and vobj.aobj_id = :aobj_id)
-order by code
+order by code, fname, sname
