@@ -656,7 +656,7 @@ def create_docx64(data_js):
     )
     document.save(path_file)
     result["path_file"] = path_file
-    result["name"] = str(df_cls["CODE"].iloc[0])
+    result["name"] = str(df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0])
     return result
 
 
