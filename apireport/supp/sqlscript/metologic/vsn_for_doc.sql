@@ -273,7 +273,7 @@ select distinct q.mlt_id,
         q.name,
         q.ord,
         q.valtype, 
-        case when q.sgn_id = 8222 then q.symsgn
+        case when q.sgn_id = 8222 then NVL(q.symsgn, q.value)
         else REPLACE(q.value, '<Отсутствует>', '   ')
         end value,
         case when q.sgn_id = 8222 then '   '
