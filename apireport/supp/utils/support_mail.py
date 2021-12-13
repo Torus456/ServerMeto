@@ -22,7 +22,6 @@ def sendmail(address_mail, subject_mail, text_mail, file_attachment, name_attach
     EMAIL_HOST_PASSWORD = "Schpil59Do"
     # EMAIL_USE_TLS = True
     DEFAULT_FROM_EMAIL = 'support@incon.ru'
-    # SUBJECT = "Согласование материалов"
     file_to_attach = file_attachment  # os.path.join(settings.BASE_DIR, "Instruction.docx")
     addresses = []
     addresses.append(address_mail)
@@ -35,7 +34,7 @@ def sendmail(address_mail, subject_mail, text_mail, file_attachment, name_attach
     name_attachment = name_attachment + ".docx"
     mail_coding = 'utf-8'
     att_header = Header(name_attachment, mail_coding)
-    header = 'Content-Disposition', 'attachment; filename="%s"' % att_header.encode('utf-8') #'Galka_Instruction.docx'
+    header = 'Content-Disposition', 'attachment; filename="%s"' % att_header.encode('utf-8')
     attachment = MIMEBase('application', "octet-stream")
     try:
         with open(file_to_attach, "rb") as fh:
