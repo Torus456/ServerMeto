@@ -282,6 +282,7 @@ select distinct q.mlt_id,
              when q.cnt > 0 then REPLACE(q.symsgn, '<Отсутствует>', '   ') 
              when q.sgn_id = 8222 then '   '
              when (q.only_dop = 2 AND LENGTH(q.value) = LENGTH(q.symsgn)) then '   '
+             when q.cnt_compare > 0 then REPLACE(q.symsgn, '<Отсутствует>', '   ')
              when replace(q.value, '.', ',') = replace(q.symsgn, '.', ',') then '   ' 
              when q.value = q.symsgn then '   '
              else REPLACE(q.symsgn, '<Отсутствует>', '   ') 
@@ -317,7 +318,17 @@ from
         q.cls_name,
         q.prj_id,
         q.sgn_id,
-        q.dvs_id) cnt 
+        q.dvs_id) cnt,
+        count(case when  value <> symsgn  then 1 else null end) over (partition by q.mlt_id,
+        q.clf_id,
+        q.cls_id,
+        q.cfv_id,
+        q.cls_code,
+        q.cls_name,
+        q.prj_id,
+        q.sgn_id,
+        q.dvs_id) cnt_compare
+         
 from   
 (select  zvsn.mlt_id,
         zvsn.clf_id,
