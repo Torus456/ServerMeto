@@ -333,7 +333,7 @@ from
         zvsn.ord,
         zvsn.valtype, 
         LISTAGG(zvsn.valchar, zvsn.multival_sep) within group (ORDER BY zvsn.value) value,
-        LISTAGG( case when zvsn.valchar = zvsn.value then zvsn.symsgn
+        LISTAGG( case when zvsn.valchar = zvsn.value then NVL(zvsn.symsgn, zvsn.value)
                       else NVL(zvsn.value,zvsn.symsgn)
                  end, zvsn.multival_sep
         ) within group (ORDER BY zvsn.value) symsgn,
