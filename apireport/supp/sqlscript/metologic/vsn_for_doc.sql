@@ -128,7 +128,9 @@ zvsn as
                        else replace(regexp_replace(to_char(vsn.valnum), '^\.', '0.'), '.', ',') 
                   end
         end value,
-        sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1) symsgn,
+        case when bsdv.only_dop = 2 
+             then nvl(replace(sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1), '<Не требуется>'), replace(sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,0), '<Не требуется>'))
+             else sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1) end symsgn,
          case when vsn.vsn_id = 0 then vsn.symsgn
              else case when bsdv.valtype = 0 then vsn.valchar
                        else replace(regexp_replace(to_char(vsn.valnum), '^\.', '0.'), '.', ',') 
@@ -202,7 +204,7 @@ select distinct  bsdv.mlt_id,
                   end
         end value,
         case when bsdv.only_dop = 2 
-             then nvl(sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1), sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,0))
+             then nvl(replace(sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1), '<Не требуется>'), replace(sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,0), '<Не требуется>'))
              else sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1) end symsgn,
         case when vsn.vsn_id = 0 then vsn.symsgn
              else case when bsdv.valtype = 0 then vsn.valchar
@@ -285,8 +287,8 @@ select distinct q.mlt_id,
              when q.cnt > 0 then REPLACE(q.symsgn, '<Отсутствует>', '   ') 
              when q.sgn_id = 8222 then '   '
              when nvl(z.iskl, 0) = 1 then '   '
-             when (q.only_dop = 2 AND LENGTH(q.value) = LENGTH(q.symsgn)) then '   '
              when q.cnt_compare > 0 then REPLACE(q.symsgn, '<Отсутствует>', '   ')
+             when (q.only_dop = 2 AND LENGTH(q.value) = LENGTH(q.symsgn)) then '   '             
              when replace(q.value, '.', ',') = replace(q.symsgn, '.', ',') then '   ' 
              when q.value = q.symsgn then '   '
              else REPLACE(q.symsgn, '<Отсутствует>', '   ') 
