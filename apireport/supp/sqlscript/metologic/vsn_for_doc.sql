@@ -276,6 +276,7 @@ select distinct q.mlt_id,
         q.ord,
         q.valtype, 
         case when q.sgn_id = 8222 then NVL(q.symsgn, q.value)
+             when nvl(z.iskl, 0) = 1 then q.symsgn
              when (q.only_dop = 2 AND LENGTH(q.value) = LENGTH(q.symsgn)) then REPLACE(q.symsgn, '<Отсутствует>', q.value) 
              when replace(q.value, '.', ',') = replace(q.symsgn, '.', ',') then q.symsgn
         else REPLACE(q.value, '<Отсутствует>', '   ')
@@ -283,6 +284,7 @@ select distinct q.mlt_id,
         case 
              when q.cnt > 0 then REPLACE(q.symsgn, '<Отсутствует>', '   ') 
              when q.sgn_id = 8222 then '   '
+             when nvl(z.iskl, 0) = 1 then '   '
              when (q.only_dop = 2 AND LENGTH(q.value) = LENGTH(q.symsgn)) then '   '
              when q.cnt_compare > 0 then REPLACE(q.symsgn, '<Отсутствует>', '   ')
              when replace(q.value, '.', ',') = replace(q.symsgn, '.', ',') then '   ' 
@@ -371,5 +373,9 @@ group by  zvsn.mlt_id,
         zvsn.inclf_id,
         zvsn.obj_id,
         zvsn.multival_sep,
-        zvsn.only_dop) q) q 
+        zvsn.only_dop) q) q,  cs_art_load.sinara_only_dop z
+where q.clf_id = z.clf_id (+)
+  and q.cls_id = z.cls_id (+)
+  and q.sgn_id = z.sgn_id (+)
+  and q.dvs_id = z.dvs_id (+) 
 order by cls_code, ord, case when vsn_id like '0%' then null else '1' end, 14

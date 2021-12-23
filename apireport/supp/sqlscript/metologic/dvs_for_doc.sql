@@ -35,17 +35,17 @@ nclv as
        bcls.project_name,
        bcls.clv_lev,
        gen_shbl_cls_pp2(  bcls.cfv_id,
-	                      bcls.mlt_id,
-	                      bcls.clf_id,
-	                      bcls.cls_id,
-	                      nmpp.sname,
-	                      1) sname,
+                          bcls.mlt_id,
+                          bcls.clf_id,
+                          bcls.cls_id,
+                          nmpp.sname,
+                          1) sname,
        gen_shbl_cls_pp2(  bcls.cfv_id,
-	                      bcls.mlt_id,
-	                      bcls.clf_id,
-	                      bcls.cls_id,
-	                      nmpp.fname,
-	                      1) fname,
+                          bcls.mlt_id,
+                          bcls.clf_id,
+                          bcls.cls_id,
+                          nmpp.fname,
+                          1) fname,
                           nmpp.fname nfname
 from bcls, nmpp
 where bcls.mlt_id = nmpp.mlt_id 
@@ -66,10 +66,10 @@ select distinct
        sdv.code,
        sdv.name || case when sd.dvs_id is not null then '(Не обязательный)' else null end name,
        sdv.ord,
-       case when sgn.valtype = 0 then 'Текстовый' 
-			      when up_zhaikmuhay.get_type_dvs_pp(sdv.mlt_id, sdv.clf_id, sdv.cls_id, sdv.sgn_id, sdv.dvs_id, :prj_id) = 1 then 'Текстовый' 
-			 else 'Числовой' end valtype     
-from nclv b, sdv, sgn, cs_art_load.sinara_not_needs_od sd
+       coalesce(dtype.new_type, case when sgn.valtype = 0 then 'Текстовый' 
+                  when up_zhaikmuhay.get_type_dvs_pp(sdv.mlt_id, sdv.clf_id, sdv.cls_id, sdv.sgn_id, sdv.dvs_id, :prj_id) = 1 then 'Текстовый' 
+             else 'Числовой' end) valtype     
+from nclv b, sdv, sgn, cs_art_load.sinara_not_needs_od sd, cs_art_load.sinara_change_type dtype
 where b.mlt_id = sdv.mlt_id 
   and b.clf_id = sdv.clf_id 
   and b.cls_id = sdv.cls_id
@@ -78,6 +78,10 @@ where b.mlt_id = sdv.mlt_id
   and sdv.clf_id = sd.clf_id (+)
   and sdv.cls_id = sd.cls_id (+)
   and sdv.dvs_id = sd.dvs_id (+)
+  and sdv.clf_id = dtype.clf_id (+)
+  and sdv.cls_id = dtype.cls_id (+)
+  and sdv.sgn_id = dtype.sgn_id (+)
+  and sdv.dvs_id = dtype.dvs_id (+)
   and sdv.mlt_id = sgn.mlt_id
   and sdv.sgn_id = sgn.sgn_id
   and regexp_like(b.nfname,'{([^[{]*)\[&?'||sdv.dvs_id|| '\]')
