@@ -326,7 +326,7 @@ from
         q.sgn_id,
         q.dvs_id) cnt,
         count(case when q.vsn_id = 0 then null
-                when  replace(q.value, '.', ',') <> replace(q.symsgn, '.', ',')  then 1 
+                when  replace(replace(trim(q.value), '.', ','), 'М', 'M') <> replace(replace(trim(q.symsgn), '.', ','), 'М', 'M')  then 1 
                 else null end) over (partition by q.mlt_id,
         q.clf_id,
         q.cls_id,
