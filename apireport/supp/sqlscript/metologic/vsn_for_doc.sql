@@ -278,7 +278,7 @@ select distinct q.mlt_id,
         q.ord,
         q.valtype, 
         case when q.sgn_id = 8222 then NVL(q.symsgn, q.value)
-             when nvl(z.iskl, 0) = 1 then q.symsgn
+             when nvl(z.iskl, 0) = 1 then NVL(q.symsgn, q.value)
              when (q.only_dop = 2 AND LENGTH(q.value) = LENGTH(q.symsgn)) then REPLACE(q.symsgn, '<Отсутствует>', q.value) 
              when replace(q.value, '.', ',') = replace(q.symsgn, '.', ',') then q.symsgn
         else REPLACE(q.value, '<Отсутствует>', '   ')
