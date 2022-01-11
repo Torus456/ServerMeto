@@ -19,4 +19,5 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url('api/', include('metologic.urls')),
+    url('budgetreport/', include('budgetpermreport.urls'))
 ]

@@ -16,8 +16,7 @@ def fill_dataframe(path, query, connect, project_args):
     Заполнить датафрейм на основе запроса
     """
     SQL_QUERY = ""
-    print(query)
-    with open(os.path.join(path, query), 'r', encoding="utf-8") as file:        
+    with open(os.path.join(path, query), 'r', encoding="utf-8") as file:
         SQL_QUERY = file.read().replace('\n', ' ')
     df = pd.read_sql(SQL_QUERY, con=connect, params=project_args)
     result = df.where((pd.notnull(df)), None)
@@ -97,7 +96,7 @@ def create_docx_with_tepmplate(data_js):
                 style="List Bullet 2"
             )
             rows = len(df_obj_cls)
-            table_obj = document.add_table(rows=rows+1, cols=2)
+            table_obj = document.add_table(rows=rows + 1, cols=2)
             table_obj.style = 'Table Grid'
             table_obj.autofit = False
             # Шапка для таблицы объектов эталона
@@ -167,7 +166,7 @@ def create_docx_with_tepmplate(data_js):
                 run.font.size = Pt(12)
                 run.underline = True
                 # Значения признаков
-                table_vsn = document.add_table(rows=values+1, cols=3)
+                table_vsn = document.add_table(rows=values + 1, cols=3)
                 table_vsn.style = 'Table Grid'
                 table_vsn.autofit = True
                 # Шапка для таблицы значений признаков
