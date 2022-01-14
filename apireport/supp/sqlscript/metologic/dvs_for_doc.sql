@@ -67,7 +67,6 @@ select distinct
        sdv.name || case when sd.dvs_id is not null then '(Не обязательный)' else null end name,
        sdv.ord,
        coalesce(dtype.new_type, case when sgn.valtype = 0 then 'Текстовый' 
-                  when up_zhaikmuhay.get_type_dvs_pp(sdv.mlt_id, sdv.clf_id, sdv.cls_id, sdv.sgn_id, sdv.dvs_id, :prj_id) = 1 then 'Текстовый' 
              else 'Числовой' end) valtype     
 from nclv b, sdv, sgn, cs_art_load.sinara_not_needs_od sd, cs_art_load.sinara_change_type dtype
 where b.mlt_id = sdv.mlt_id 
