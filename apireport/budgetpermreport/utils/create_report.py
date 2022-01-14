@@ -35,6 +35,14 @@ def get_report_incidents(start_date: str, end_date: str):
         start_date,
         end_date
     )
+    column_definition = [
+        {"name": "п/п", "width": 0.5},
+        {"name": "Наименование инцидента", "width": 18},
+        {"name": "Опиcание", "width": 18},
+        {"name": "Приоритет", "width": 8},
+        {"name": "Дата выявления", "width": 10},
+        {"name": "Дата исправления", "width": 10}
+    ]
     conn = connect_to_portal()
     incidents = fill_dataframe(
         sql_path,
@@ -48,19 +56,8 @@ def get_report_incidents(start_date: str, end_date: str):
     table_incident.style = 'Table Grid'
     table_incident.autofit = True
     # Шапка для таблицы значений признаков
-    cell = table_incident.cell(0, 0)
-    cell.text = "п/п"
-    cell.width = Inches(0.5)
-    cell = table_incident.cell(0, 1)
-    cell.text = "Наименование инцидента"
-    cell = table_incident.cell(0, 2)
-    cell.text = "Описание"
-    cell = table_incident.cell(0, 3)
-    cell.text = "Приоритет"
-    cell = table_incident.cell(0, 4)
-    cell.text = "Дата выявления"
-    cell = table_incident.cell(0, 5)
-    cell.text = "Дата исправления"
+    fill_table_header(table_incident, column_definition)
+
     i = 1
     for row in incidents.itertuples():
         cell = table_incident.cell(i, 0)
@@ -75,7 +72,7 @@ def get_report_incidents(start_date: str, end_date: str):
         cell = table_incident.cell(i, 4)
         cell.text = row.date_start
         cell = table_incident.cell(i, 5)
-        cell.text = row.date_finish
+        cell.text = "" if row.date_finish is None else row.date_finish
         i += 1
     path_file = (
         settings.BASE_DIR +
@@ -88,3 +85,17 @@ def get_report_incidents(start_date: str, end_date: str):
     result["path_file"] = path_file
     result["name"] = "Отчет инцидентов"
     return result
+
+
+def fill_table_header(table, columns_definition):
+    """Создание шапки таблицы"""
+    for index, column in enumerate(columns_definition):
+        cell = table.cell(0, index)
+        cell.text = column["name"]
+        if column["width"]:
+            cell.width = Inches(column["width"])
+
+
+def fill_table_data(table, table_data):
+    """Наполнение таблицы данными"""
+    print("No")
