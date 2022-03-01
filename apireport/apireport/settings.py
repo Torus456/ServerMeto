@@ -80,8 +80,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.oracle',
         'NAME': '192.168.54.17:1521/ORA5.INCON.LO',
-        'USER': 'CS_DEV',
-        'PASSWORD': 'CS_DEV',
+        'USER': 'CS_ART',
+        'PASSWORD': 'CS_ART',
     }
 }
 
