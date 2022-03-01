@@ -585,7 +585,7 @@ def create_docx64(data_js):
     os.environ["NLS_LANG"] = '.AL32UTF8'
     sql_path = settings.BASE_DIR + "/supp/sqlscript/metologic"
     docs_path = settings.BASE_DIR + "/supp/word_template/" + "Schablon64.docx"
-    con = cx_Oracle.connect('PS_SINARA/PS_SINARA@192.168.54.17:1521/ORA5.INCON.LO')
+    con = cx_Oracle.connect('CS_ART/CS_ART@192.168.54.17:1521/ORA5.INCON.LO')
     result = {}
     project_args = {
         "MLT_ID": data_js.get("project_args").get("mlt_id"),
