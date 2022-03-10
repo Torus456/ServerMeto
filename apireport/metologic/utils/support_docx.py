@@ -17,7 +17,7 @@ def fill_dataframe(path, query, connect, project_args):
     """
     SQL_QUERY = ""
     print(query)
-    with open(os.path.join(path, query), 'r', encoding="utf-8") as file:        
+    with open(os.path.join(path, query), 'r', encoding="utf-8") as file:
         SQL_QUERY = file.read().replace('\n', ' ')
     df = pd.read_sql(SQL_QUERY, con=connect, params=project_args)
     result = df.where((pd.notnull(df)), None)
@@ -97,7 +97,7 @@ def create_docx_with_tepmplate(data_js):
                 style="List Bullet 2"
             )
             rows = len(df_obj_cls)
-            table_obj = document.add_table(rows=rows+1, cols=2)
+            table_obj = document.add_table(rows=rows + 1, cols=2)
             table_obj.style = 'Table Grid'
             table_obj.autofit = False
             # Шапка для таблицы объектов эталона
@@ -130,7 +130,7 @@ def create_docx_with_tepmplate(data_js):
             # выбираем признаки для класса
             df_attribute_cls = df_dvs.loc[df_dvs["CLS_ID"] == row["CLS_ID"]]
             rows = len(df_attribute_cls)
-            table = document.add_table(rows=rows+1, cols=3)
+            table = document.add_table(rows=rows + 1, cols=3)
             table.style = 'Table Grid'
             table.autofit = True
             # Шапка для таблицы признаков
@@ -167,7 +167,7 @@ def create_docx_with_tepmplate(data_js):
                 run.font.size = Pt(12)
                 run.underline = True
                 # Значения признаков
-                table_vsn = document.add_table(rows=values+1, cols=3)
+                table_vsn = document.add_table(rows=values + 1, cols=3)
                 table_vsn.style = 'Table Grid'
                 table_vsn.autofit = True
                 # Шапка для таблицы значений признаков
@@ -198,7 +198,7 @@ def create_docx_with_tepmplate(data_js):
                         k = 1
                     else:
                         a = table_vsn.cell(start_union, 0)
-                        b = table_vsn.cell(start_union+k, 0)
+                        b = table_vsn.cell(start_union + k, 0)
                         A = a.merge(b)
                         A.text = union_name
                         k += 1
@@ -228,9 +228,9 @@ def create_docx_with_tepmplate(data_js):
                     cell.text = row["UMS_NAME"]
                     cell = table_umscls.cell(1, 2)
                     cell.text = row["UMS_CODE"]
-                df_okved_cls = df_okved.loc[
-                    df_okved["CLS_ID"] == row["CLS_ID"]
-                    ][["OKVED_CODE", "OKVED_NAME"]].drop_duplicates()
+                df_okved_cls = df_okved.loc[df_okved["CLS_ID"] == row["CLS_ID"]][
+                    ["OKVED_CODE", "OKVED_NAME"]
+                ].drop_duplicates()
                 if len(df_okved_cls) > 0:
                     document.add_paragraph().add_run()
                     p = document.add_paragraph(
@@ -255,8 +255,7 @@ def create_docx_with_tepmplate(data_js):
                         cell.text = okv["OKVED_NAME"]
                         r += 1
                 df_okdp_cls = df_okved.loc[
-                    df_okved["CLS_ID"] == row["CLS_ID"]
-                    ][["OKDP_CODE", "OKDP_NAME"]].drop_duplicates()
+                    df_okved["CLS_ID"] == row["CLS_ID"]][["OKDP_CODE", "OKDP_NAME"]].drop_duplicates()
                 if len(df_okved_cls) > 0:
                     document.add_paragraph().add_run()
                     p = document.add_paragraph(
@@ -281,8 +280,7 @@ def create_docx_with_tepmplate(data_js):
                         cell.text = okv["OKDP_NAME"]
                         r += 1
                 df_lot_cls = df_okved.loc[
-                    df_okved["CLS_ID"] == row["CLS_ID"]
-                    ][["LOT_CODE"]].drop_duplicates().dropna().head(1)
+                    df_okved["CLS_ID"] == row["CLS_ID"]][["LOT_CODE"]].drop_duplicates().dropna().head(1)
                 if len(df_lot_cls) > 0:
                     document.add_paragraph().add_run()
                     p = document.add_paragraph(
@@ -298,14 +296,10 @@ def create_docx_with_tepmplate(data_js):
         if ':КЛАСС:' in paragraph.text:
             paragraph.text = df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
 
-    path_file = (
-                    settings.BASE_DIR +
-                    "/upload/Metodika_" +
-                    project_args.get("CLS_ID") +
-                    "_" +
-                    str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) +
-                    ".docx"
-                )
+    path_file = (settings.BASE_DIR +
+                 "/upload/Metodika_" + project_args.get("CLS_ID") + "_" +
+                 str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) +
+                 ".docx")
     document.save(path_file)
     result["path_file"] = path_file
     result["name"] = df_cls["CODE"].iloc[0]
@@ -380,7 +374,7 @@ def create_docx(data_js):
                 style="List Bullet 2"
             )
             rows = len(df_obj_cls)
-            table_obj = document.add_table(rows=rows+1, cols=3)
+            table_obj = document.add_table(rows=rows + 1, cols=3)
             table_obj.style = 'Table Grid'
             table_obj.autofit = False
             # Шапка для таблицы объектов эталона
@@ -418,7 +412,7 @@ def create_docx(data_js):
             # выбираем признаки для класса
             df_attribute_cls = df_dvs.loc[df_dvs["CLS_ID"] == row["CLS_ID"]]
             rows = len(df_attribute_cls)
-            table = document.add_table(rows=rows+1, cols=2)
+            table = document.add_table(rows=rows + 1, cols=2)
             table.style = 'Table Grid'
             table.autofit = True
             # Шапка для таблицы признаков
@@ -449,7 +443,7 @@ def create_docx(data_js):
                 run.font.size = Pt(12)
                 run.underline = True
                 # Значения признаков
-                table_vsn = document.add_table(rows=values+1, cols=3)
+                table_vsn = document.add_table(rows=values + 1, cols=3)
                 table_vsn.style = 'Table Grid'
                 table_vsn.autofit = True
                 # Шапка для таблицы значений признаков
@@ -480,7 +474,7 @@ def create_docx(data_js):
                         k = 1
                     else:
                         a = table_vsn.cell(start_union, 0)
-                        b = table_vsn.cell(start_union+k, 0)
+                        b = table_vsn.cell(start_union + k, 0)
                         A = a.merge(b)
                         A.text = union_name
                         k += 1
@@ -507,7 +501,7 @@ def create_docx(data_js):
                     cell.text = row["UMS_CODE"]
                 df_okved_cls = df_okved.loc[
                     df_okved["CLS_ID"] == row["CLS_ID"]
-                    ][["OKVED_CODE", "OKVED_NAME"]].drop_duplicates()
+                ][["OKVED_CODE", "OKVED_NAME"]].drop_duplicates()
                 if len(df_okved_cls) > 0:
                     document.add_paragraph().add_run().add_break()
                     p = document.add_paragraph(
@@ -531,11 +525,9 @@ def create_docx(data_js):
                         cell = table_okved.cell(r, 1)
                         cell.text = okv["OKVED_NAME"]
                         r += 1
-                
                 df_okpd_cls = df_okpd.loc[
                     df_okpd["CLS_ID"] == row["CLS_ID"]
-                    ][["OKVED_CODE", "OKVED_NAME"]].drop_duplicates()
-                
+                ][["OKVED_CODE", "OKVED_NAME"]].drop_duplicates()
                 if len(df_okpd_cls) > 0:
                     print(row["CLS_ID"])
                     print(df_okpd_cls.head())
@@ -564,14 +556,12 @@ def create_docx(data_js):
         if row["SNAME"]:
             document.add_page_break()
 
-    path_file = (
-                    settings.BASE_DIR +
-                    "/upload/Metodika_" +
-                    project_args.get("CLS_ID") +
-                    "_" +
-                    str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) +
-                    ".docx"
-                )
+    path_file = (settings.BASE_DIR +
+                 "/upload/Metodika_" +
+                 project_args.get("CLS_ID") +
+                 "_" +
+                 str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) +
+                 ".docx")
     document.save(path_file)
     result["path_file"] = path_file
     result["name"] = "Hello"
@@ -736,7 +726,7 @@ def add_project_name(document, df_obj_cls):
         style="List Bullet 2"
     )
     rows = len(df_obj_cls)
-    table_obj = document.add_table(rows=rows+1, cols=3)
+    table_obj = document.add_table(rows=rows + 1, cols=3)
     table_obj.style = 'Table Grid'
     table_obj.autofit = False
     # Шапка для таблицы объектов эталона
@@ -780,7 +770,7 @@ def add_object_value(document, df_vsn_cls):
     run.font.size = Pt(12)
     run.underline = True
     # Значения признаков
-    table_vsn = document.add_table(rows=values+1, cols=3)
+    table_vsn = document.add_table(rows=values + 1, cols=3)
     table_vsn.style = 'Table Grid'
     table_vsn.autofit = True
     # Шапка для таблицы значений признаков
@@ -811,7 +801,7 @@ def add_object_value(document, df_vsn_cls):
             k = 1
         else:
             a = table_vsn.cell(start_union, 0)
-            b = table_vsn.cell(start_union+k, 0)
+            b = table_vsn.cell(start_union + k, 0)
             A = a.merge(b)
             A.text = union_name
             k += 1
@@ -831,7 +821,7 @@ def add_dvs_type_and_name(document, df_attribute_cls):
     run.font.size = Pt(12)
     run.underline = True
     rows = len(df_attribute_cls)
-    table = document.add_table(rows=rows+1, cols=2)
+    table = document.add_table(rows=rows + 1, cols=2)
     table.style = 'Table Grid'
     table.autofit = True
     # Шапка для таблицы признаков
@@ -854,4 +844,6 @@ def add_dvs_type_and_name(document, df_attribute_cls):
         cell.text = attr.VALTYPE
         cnt += 1
     if add_decription:
-        document.add_paragraph("1 – Если значение признака не определено для записи материала, оно может быть не указано")
+        document.add_paragraph(
+            "1 – Если значение признака не определено для записи материала, оно может быть не указано"
+        )

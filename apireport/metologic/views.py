@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from supp.views import sendmail
 from .utils.support_docx import create_docx, create_docx_with_tepmplate, create_docx64
-from  metologic.tasks import send_mail, add_task
+from metologic.tasks import send_mail, add_task
 
 
 def create_metodologic(request):

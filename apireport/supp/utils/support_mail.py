@@ -31,22 +31,24 @@ def sendmail(address_mail, subject_mail, text_mail, file_attachment, name_attach
     msg['Subject'] = Header(subject_mail, 'utf-8')
     msg['From'] = DEFAULT_FROM_EMAIL
     msg['To'] = ','.join(addresses)
-    name_attachment = name_attachment + ".docx"
-    mail_coding = 'utf-8'
-    att_header = Header(name_attachment, mail_coding)
-    header = 'Content-Disposition', 'attachment; filename="%s"' % att_header.encode('utf-8')
-    attachment = MIMEBase('application', "octet-stream")
-    try:
-        with open(file_to_attach, "rb") as fh:
-            data = fh.read()
-        attachment.set_payload(data)
-        attachment.add_header(*header)
-        encoders.encode_base64(attachment)
-        msg.attach(attachment)
-    except IOError:
-        msg = "Error opening attachment file %s" % file_to_attach
-        print(msg)
-        sys.exit(1)
+    msg.set_payload("Text")
+    if name_attachment:
+        name_attachment = name_attachment + ".docx"
+        mail_coding = 'utf-8'
+        att_header = Header(name_attachment, mail_coding)
+        header = 'Content-Disposition', 'attachment; filename="%s"' % att_header.encode('utf-8')
+        attachment = MIMEBase('application', "octet-stream")
+        try:
+            with open(file_to_attach, "rb") as fh:
+                data = fh.read()
+            attachment.set_payload(data)
+            attachment.add_header(*header)
+            encoders.encode_base64(attachment)
+            msg.attach(attachment)
+        except IOError:
+            msg = "Error opening attachment file %s" % file_to_attach
+            print(msg)
+            sys.exit(1)
     smtpObj = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=60)
     smtpObj.login(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
     smtpObj.sendmail(DEFAULT_FROM_EMAIL, addresses, msg.as_string())
