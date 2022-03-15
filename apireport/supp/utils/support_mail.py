@@ -1,6 +1,5 @@
 import smtplib
 import sys
-import os
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email.header import Header
@@ -31,7 +30,8 @@ def sendmail(address_mail, subject_mail, text_mail, file_attachment, name_attach
     msg['Subject'] = Header(subject_mail, 'utf-8')
     msg['From'] = DEFAULT_FROM_EMAIL
     msg['To'] = ','.join(addresses)
-    msg.set_payload("Text")
+    body = MIMEText(text_mail, 'plain')
+    msg.set_payload(body)
     if name_attachment:
         name_attachment = name_attachment + ".docx"
         mail_coding = 'utf-8'

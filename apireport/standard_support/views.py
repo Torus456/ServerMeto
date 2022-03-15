@@ -7,10 +7,8 @@ import json
 import urllib.request
 import urllib
 
-from django.shortcuts import render
 from django.db import connection
 from bs4 import BeautifulSoup
-from urllib.parse import quote
 from supp.views import sendmail
 from django.http import JsonResponse
 
@@ -30,7 +28,11 @@ def parse_gosts(request):
         parse_standarts_all_info(con, df)
     except (ConnectionError, ConnectionRefusedError):
         parse_standarts_all_info(con, df)
-    sendmail(request_data.get("email"), "Проверка стандарта", "Проверка по выбранным данным завершено", None, None)
+    sendmail(request_data.get("email"),
+             "Проверка стандарта",
+             "Парсинг закончен. Запустите в аналитическом модуле отчет id=2639.",
+             None,
+             None)
     return JsonResponse(result, status=status)
 
 
@@ -53,7 +55,7 @@ def save_in_db(cur, data):
     """
     Сохраняем данные с проверенными данными в таблицу gosts
     """
-    sql_insert = """begin 
+    sql_insert = """begin
                     ap_standard.insert_into_gosts(:p_mlt_id,
                                                   :p_sgn_id,
                                                   :p_vsn_id,
@@ -76,7 +78,7 @@ def update_db(cur, data):
     """
     Изменяем статус проверенного стандарта
     """
-    sql_insert = """begin 
+    sql_insert = """begin
                     ap_standard.update_gost(:p_mlt_id,
                                             :p_sgn_id,
                                             :p_vsn_id);
@@ -99,7 +101,8 @@ def parse_standarts(connection, df):
     cur = connection.cursor()
     for index, row in df.iterrows():
         print(row["VALCHAR"])
-        url = 'https://www.standards.ru/doc.aspx?catalogid=gost&search=' + urllib.parse.quote_plus(row["VALCHAR"], encoding='cp1251')
+        url = 'https://www.standards.ru/doc.aspx?catalogid=gost&search=' \
+              + urllib.parse.quote_plus(row["VALCHAR"], encoding='cp1251')
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0'}
         headers['Content-Type'] = 'text/html; charset=UTF-8'
         response = requests.get(url, headers=HEADERS)
@@ -140,7 +143,8 @@ def parse_standarts_all_info(connection, df):
     cur = connection.cursor()
     for index, row in df.iterrows():
         print(row["VALCHAR"])
-        url = 'https://www.standards.ru/doc.aspx?catalogid=gost&search=' + urllib.parse.quote_plus(row["VALCHAR"], encoding='cp1251')
+        url = 'https://www.standards.ru/doc.aspx?catalogid=gost&search=' \
+              + urllib.parse.quote_plus(row["VALCHAR"], encoding='cp1251')
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0'}
         headers['Content-Type'] = 'text/html; charset=UTF-8'
         response = requests.get(url, headers=HEADERS)
@@ -162,7 +166,7 @@ def parse_standarts_all_info(connection, df):
                         data["STATUS"] = re.sub(pattern,
                                                 '',
                                                 table_status[0].find_all('td', class_="tx12")[i * 2 + 1].string)
-                        data["GOST"] = value# table_status[0].find_all('div')[i * 3 + 1].find_all('a')[0].string
+                        data["GOST"] = value  # table_status[0].find_all('div')[i * 3 + 1].find_all('a')[0].string
                     except:
                         data["MLT_ID"] = row["MLT_ID"]
                         data["SGN_ID"] = row["SGN_ID"]
