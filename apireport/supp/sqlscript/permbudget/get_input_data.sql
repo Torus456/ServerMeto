@@ -10,12 +10,13 @@ select rec.record_id,
 	   CONVERT(VARCHAR(16),rec.date_create , 103) date_start,
 	   CONVERT(VARCHAR(16),rec.date_finish , 103) date_finish,
 	   cRecordType.recordtype_name recordtype_name,
-	   cPriority.priority_name
+	   cPriority.priority_name,
+	   rec.record_queue keyword
 from cRecords rec 
 		join eUsers usr ON (rec.creator_id = usr.user_id) 
 		join cRecordType ON (rec.recordtype_id = cRecordType.recordtype_id)
 		join cPriority ON (rec.priority_id = cPriority.priority_id)
 where rec.record_id > 3898
   and rec.system_id = 27
-  and cRecordType.recordtype_id <> 117
+  and cRecordType.recordtype_id = 117
   and rec.date_create between CONVERT(DATETIME, ? , 104) AND CONVERT(DATETIME, ? , 104)

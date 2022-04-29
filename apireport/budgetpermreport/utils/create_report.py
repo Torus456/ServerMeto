@@ -99,3 +99,68 @@ def fill_table_header(table, columns_definition):
 def fill_table_data(table, table_data):
     """Наполнение таблицы данными"""
     print("No")
+
+
+def get_report_data(start_date: str, end_date: str):
+    """
+    Формируем даннные по инцидентам  отправляем на указанную почту
+    """
+    result = {}
+    sql_path = settings.BASE_DIR + "/supp/sqlscript/permbudget"
+    docs_path = settings.BASE_DIR + "/supp/word_template/" + "budget_data.docx"
+    project_args = (
+        start_date,
+        end_date
+    )
+    column_definition = [
+        {"name": "п/п", "width": 0.5},
+        {"name": "Дата поступления данных", "width": 18},
+        {"name": "Цели и задачи", "width": 18},
+        {"name": "Требования к результату", "width": 8},
+        {"name": "Описание результатов, с указанием даты загрузки данных в Систему", "width": 10},
+        {"name": "Анализ соответствия результатов поставленным целям, задачам и требованиям", "width": 10}
+    ]
+    conn = connect_to_portal()
+    incidents = fill_dataframe(
+        sql_path,
+        'get_input_data.sql',
+        conn,
+        project_args
+    )
+    document = docx.Document(docs_path)
+    rows = len(incidents)
+    table_incident = document.add_table(rows=rows + 1, cols=6)
+    table_incident.style = 'Table Grid'
+    table_incident.autofit = True
+    # Шапка для таблицы значений признаков
+    fill_table_header(table_incident, column_definition)
+    
+    i = 1
+    for row in incidents.itertuples():
+        descr = "" if row.date_finish is None else row.date_finish
+        initiator = "" if row.keyword is None else row.keyword
+        cell = table_incident.cell(i, 0)
+        cell.width = Inches(0.5)
+        cell.text = str(row.record_number)
+        cell = table_incident.cell(i, 1)
+        cell.text = row.date_start.replace("<br />", "")
+        cell = table_incident.cell(i, 2)
+        cell.text = row.record_title.replace("<br />", "")
+        cell = table_incident.cell(i, 3)
+        cell.text = row.record_desc.replace("<br />", "")
+        cell = table_incident.cell(i, 4)
+        cell.text = descr + " " + initiator
+        cell = table_incident.cell(i, 5)
+        cell.text = ""
+        i += 1
+    path_file = (
+        settings.BASE_DIR +
+        "/upload/budget_data_" +
+        "_" +
+        str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) +
+        ".docx"
+    )
+    document.save(path_file)
+    result["path_file"] = path_file
+    result["name"] = "Ввод данных"
+    return result
