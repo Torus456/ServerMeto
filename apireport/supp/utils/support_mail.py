@@ -31,9 +31,9 @@ def sendmail(address_mail, subject_mail, text_mail, file_attachment, name_attach
     msg['From'] = DEFAULT_FROM_EMAIL
     msg['To'] = ','.join(addresses)
     body = MIMEText(text_mail, 'plain')
-    msg.set_payload(body)
+    # msg.set_payload(body)
     if name_attachment:
-        name_attachment = name_attachment + ".docx"
+        name_attachment = name_attachment # + ".docx"
         mail_coding = 'utf-8'
         att_header = Header(name_attachment, mail_coding)
         header = 'Content-Disposition', 'attachment; filename="%s"' % att_header.encode('utf-8')
