@@ -9,9 +9,10 @@ with bcls as
        clv.cfv_id,
        prj.prj_id,
        prj.name project_name,
-       connect_by_isleaf isleaf,
-       level clv_lev
-from clv, cfv, prj
+       level top_level,
+       clv.top_level clv_lev,
+       connect_by_isleaf isleaf
+from clv, cfv, prj 
 where clv.cfv_id = cfv.cfv_id
   and prj.prj_id = cfv.prj_id
   and clv.status <> 2
@@ -22,7 +23,34 @@ start with clv.mlt_id = :mlt_id
 connect by prior clv.mlt_id = clv.mlt_id
   and prior clv.cfv_id = clv.cfv_id 
   and prior clv.clf_id = clv.clv_clf_id
-  and prior clv.cls_id = clV.clv_cls_id)
+  and prior clv.cls_id = clv.clv_cls_id
+union all 
+select clv.mlt_id,
+       clv.clf_id,
+       clv.cls_id,
+       clv.clv_clf_id,
+       clv.clv_cls_id,
+       clv.name,
+       clv.code,
+       clv.cfv_id,
+       prj.prj_id,
+       prj.name project_name,
+       level top_level,
+       clv.top_level clv_lev,
+       0 isleaf
+from clv, cfv, prj 
+where clv.cfv_id = cfv.cfv_id
+  and prj.prj_id = cfv.prj_id
+  and clv.cls_id <> :cls_id
+  and clv.status <> 2
+start with clv.mlt_id = :mlt_id
+  and clv.clf_id = :clf_id
+  and clv.cls_id = :cls_id
+  and clv.cfv_id = :cfv_id
+connect by prior clv.mlt_id = clv.mlt_id
+  and prior clv.cfv_id = clv.cfv_id 
+  and prior clv.clv_clf_id = clv.clf_id
+  and prior clv.clv_cls_id = clv.cls_id)
 select bcls.mlt_id,
        bcls.clf_id,
        bcls.cls_id,
@@ -33,8 +61,8 @@ select bcls.mlt_id,
        bcls.cfv_id,
        bcls.prj_id,
        bcls.project_name,
-       bcls.clv_lev,
-       bcls.isleaf,
+       bcls.clv_lev clv_lev,
+       to_number(bcls.isleaf) isleaf,
        sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id , 41, 66, 'sname') sname,
        sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id , 41, 66, 'fname') fname,
        case when isleaf = 1 then ums.code

@@ -9,7 +9,8 @@ with bcls as
        clv.cfv_id,
        prj.prj_id,
        prj.name project_name,
-       level clv_lev,
+       level top_level,
+       clv.top_level clv_lev,
        connect_by_isleaf list
 from clv, cfv, prj 
 where clv.cfv_id = cfv.cfv_id
@@ -21,7 +22,33 @@ start with clv.mlt_id = :mlt_id
 connect by prior clv.mlt_id = clv.mlt_id
   and prior clv.cfv_id = clv.cfv_id 
   and prior clv.clf_id = clv.clv_clf_id
-  and prior clv.cls_id = clv.clv_cls_id),
+  and prior clv.cls_id = clv.clv_cls_id
+union all 
+select clv.mlt_id,
+       clv.clf_id,
+       clv.cls_id,
+       clv.clv_clf_id,
+       clv.clv_cls_id,
+       clv.name,
+       clv.code,
+       clv.cfv_id,
+       prj.prj_id,
+       prj.name project_name,
+       level top_level,
+       clv.top_level clv_lev,
+       0 list
+from clv, cfv, prj 
+where clv.cfv_id = cfv.cfv_id
+  and prj.prj_id = cfv.prj_id
+  and clv.cls_id <> :cls_id
+start with clv.mlt_id = :mlt_id
+  and clv.clf_id = :clf_id
+  and clv.cls_id = :cls_id
+  and clv.cfv_id = :cfv_id
+connect by prior clv.mlt_id = clv.mlt_id
+  and prior clv.cfv_id = clv.cfv_id 
+  and prior clv.clv_clf_id = clv.clf_id
+  and prior clv.clv_cls_id = clv.cls_id),
 zvds as
 (select distinct 
        bcls.mlt_id,
@@ -38,7 +65,8 @@ zvds as
        vsn.valchar,
        vsn.symsgn,
        vsn.valnum,
-       regexp_instr(nmpp.fname, '\[&?'||dvs.dvs_id||'\]') ord
+       regexp_instr(nmpp.fname, '\[&?'||dvs.dvs_id||'\]') ord,
+       regexp_count(nmpp.sname||nmpp.fname, '\[&'||dvs.dvs_id||'\]') cnt
 from bcls, nmpp, dvs, sdv, vds, sgn, vsn    
 where bcls.mlt_id = nmpp.mlt_id
   and bcls.clf_id = nmpp.clf_id
@@ -89,7 +117,8 @@ zvsn as
              when zvds.valtype = 0 then to_char(sp_acceptor.return_values (zvds.mlt_id, zvds.clf_id, zvds.cls_id, zvds.prj_id, zvds.dvs_id, zvds.sgn_id, zvds.vsn_id, 0, 1))
              else replace(regexp_replace(replace(to_char(zvds.valnum), ',', '.'), '^\.', '0.'), ',', '.') 
         end value,
-        case when zvds.valtype = 1 then '' 
+        case when zvds.valtype = 1 then ''
+             when zvds.cnt >= 2 then ''
              else to_char(sp_acceptor.return_values (zvds.mlt_id, zvds.clf_id, zvds.cls_id, zvds.prj_id, zvds.dvs_id, zvds.sgn_id, zvds.vsn_id, 1, 1)) 
              end symsgn
 from zvds),
@@ -155,6 +184,7 @@ select  xobj.mlt_id,
         xobj.sname,
         xobj.fname,
         xobj.obj_id,
+        zvsn.dvs_id,
         zvsn.sdvname,
         zvsn.mnd,
         zvsn.value,

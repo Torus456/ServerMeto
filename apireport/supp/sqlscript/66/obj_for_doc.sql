@@ -9,7 +9,8 @@ with bcls as
        clv.cfv_id,
        prj.prj_id,
        prj.name project_name,
-       level clv_lev,
+       level top_level,
+       clv.top_level clv_lev,
        connect_by_isleaf list
 from clv, cfv, prj 
 where clv.cfv_id = cfv.cfv_id
@@ -21,7 +22,33 @@ start with clv.mlt_id = :mlt_id
 connect by prior clv.mlt_id = clv.mlt_id
   and prior clv.cfv_id = clv.cfv_id 
   and prior clv.clf_id = clv.clv_clf_id
-  and prior clv.cls_id = clV.clv_cls_id),
+  and prior clv.cls_id = clv.clv_cls_id
+union all 
+select clv.mlt_id,
+       clv.clf_id,
+       clv.cls_id,
+       clv.clv_clf_id,
+       clv.clv_cls_id,
+       clv.name,
+       clv.code,
+       clv.cfv_id,
+       prj.prj_id,
+       prj.name project_name,
+       level top_level,
+       clv.top_level clv_lev,
+       0 list
+from clv, cfv, prj 
+where clv.cfv_id = cfv.cfv_id
+  and prj.prj_id = cfv.prj_id
+  and clv.cls_id <> :cls_id
+start with clv.mlt_id = :mlt_id
+  and clv.clf_id = :clf_id
+  and clv.cls_id = :cls_id
+  and clv.cfv_id = :cfv_id
+connect by prior clv.mlt_id = clv.mlt_id
+  and prior clv.cfv_id = clv.cfv_id 
+  and prior clv.clv_clf_id = clv.clf_id
+  and prior clv.clv_cls_id = clv.cls_id),
 zcls
 as (select   distinct
            cls.mlt_id,
@@ -98,7 +125,7 @@ from
        xcls.cls_id_pp cls_id,
        xcls.code,
        xcls.name,
-       oclp.name sname,
+       oclp.sname sname,
        oclp.fname,
        nvl(ums.code, xcls.ums_code) ums_code,
        nvl(ums.name, xcls.ums_name) ums_name,
@@ -134,7 +161,7 @@ select distinct xcls.mlt_id,
        xcls.cls_id_pp cls_id,
        xcls.code,
        xcls.name,
-       oclp.name sname,
+       oclp.sname sname,
        oclp.fname,
        nvl(ums.code, xcls.ums_code) ums_code,
        nvl(ums.name, xcls.ums_name) ums_name,

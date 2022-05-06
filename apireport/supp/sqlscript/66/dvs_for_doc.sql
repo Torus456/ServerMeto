@@ -67,13 +67,11 @@ select distinct
        sdv.name,
        sdv.ord,
        dvs.mnd,
-       lst.od,
        case when sgn.valtype = 1 then ums.code else null end ums_code,
-       case when lst.od is not null then 'Список'
-            when sgn.valtype = 0 then 'Текстовый' 
+       case when sgn.valtype = 0 then 'Текстовый' 
             else 'Числовой' end valtype,
       :cst_id
-from nclv b, sdv, dvs, sgn, ums, cs_art_load.ns_dvs_list lst 
+from nclv b, sdv, dvs, sgn, ums 
 where b.mlt_id = sdv.mlt_id 
   and b.clf_id = sdv.clf_id 
   and b.cls_id = sdv.cls_id
@@ -86,6 +84,5 @@ where b.mlt_id = sdv.mlt_id
   and sdv.mlt_id = sgn.mlt_id
   and sdv.sgn_id = sgn.sgn_id
   and sgn.ums_id = ums.ums_id (+)
-  and sdv.name = lst.od (+)
   and regexp_like(b.nfname,'{([^[{]*)\[&?'||sdv.dvs_id|| '\]')
 order by b.code, sdv.ord
