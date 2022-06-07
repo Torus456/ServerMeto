@@ -10,13 +10,13 @@ with bcls as
        prj.prj_id,
        prj.name project_name,
        level clv_lev
-from clv, cfv, prj
+from (select * from clv where clv.cfv_id = :cfv_id and clv.status <> 2) clv, cfv, prj
 where clv.cfv_id = cfv.cfv_id
   and prj.prj_id = cfv.prj_id
   and prj.prj_id = :prj_id
 start with clv.mlt_id = :mlt_id
   and clv.clf_id = :clf_id
-  and clv.cls_id = :cls_id
+  and (clv.cls_id = :cls_id or (:cls_id = -1 AND clv.clv_clf_id is null))
   and clv.cfv_id = :cfv_id
 connect by prior clv.mlt_id = clv.mlt_id
   and prior clv.cfv_id = clv.cfv_id 

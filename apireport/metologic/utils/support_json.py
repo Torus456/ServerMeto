@@ -36,9 +36,9 @@ def fill_json_for_ns(data_js):
     df_vsn = fill_dataframe(sql_path, 'vsn_for_doc.sql', con, project_args_obj)
     df_obj = fill_dataframe(sql_path, 'obj_for_doc.sql', con, project_args_obj)
     df_lst = fill_dataframe(sql_path, 'dict_list.sql', con, project_args)
+    print(len(df_obj))
     temp_dict = {}
     prev_dict = {}
-    
     dict_cls = {}
     temp_dict["catalog"] = []
     prev_dict = temp_dict["catalog"]
@@ -49,12 +49,12 @@ def fill_json_for_ns(data_js):
         newdict = {}
         newdict["name"] = row["NAME"]
         lvl = row["CLV_LEV"]
-        dict_cls[row["NAME"]] = prev_dict
+        dict_cls[row["NAME"]] = [prev_dict, prev_name]
         if (row["ISLEAF"] != 1):
             newdict["children"] = []
         else:
             newdict["information_models"] = []
-            newdict["information_models"].append(get_data_cls(row, df_dvs, df_obj, df_vsn, df_lst))
+            newdict["information_models"].append(get_data_cls(con, row, df_dvs, df_obj, df_vsn, df_lst))
 
         # Если уровень 1 нужно его на первый уровень и забросить
         # if lvl == 1:
@@ -71,9 +71,27 @@ def fill_json_for_ns(data_js):
             else:
                 prev_dict.append(newdict)
         elif (lvl < plvl):
-            prev_dict = dict_cls[prev_name]
+            for i in range(1, plvl - lvl):
+                prev_name = dict_cls[prev_name][1]
+            prev_dict = dict_cls[prev_name][0]
             prev_dict.append(newdict)
             prev_dict = newdict["children"]
+                
+            # if plvl - lvl == 1:
+            #     prev_dict = dict_cls[prev_name][0]
+            #     prev_dict.append(newdict)
+            #     prev_dict = newdict["children"]
+            # elif plvl - lvl == 2:
+            #     prev_name = dict_cls[prev_name][1]
+            #     prev_dict = dict_cls[prev_name][0]
+            #     prev_dict.append(newdict)
+            #     prev_dict = newdict["children"]
+            # else:
+            #     prev_name = dict_cls[prev_name][1]
+            #     prev_name = dict_cls[prev_name][1]
+            #     prev_dict = dict_cls[prev_name][0]
+            #     prev_dict.append(newdict)
+            #     prev_dict = newdict["children"]
         else:
             prev_dict.append(newdict)
         plvl = lvl
@@ -113,7 +131,7 @@ def fill_json_for_ns(data_js):
     return result
 
 
-def get_data_cls(cls, dvs, obj, vsn, lst):
+def get_data_cls(con, cls, dvs, obj, vsn, lst):
     """ Заполняем информацию по классу в формате словаря"""
     data_cls = {}
     # Тип продукта (Это наименование класса листка)
@@ -133,7 +151,7 @@ def get_data_cls(cls, dvs, obj, vsn, lst):
     # Еще какие-то атрибуты
     data_cls["auxiliary_attributes"] = get_attributes(cls, dvs, vsn, 0, False)
     # Продуктовые карточки
-    data_cls["product_reference_cards"] = get_products(cls, obj, vsn)
+    data_cls["product_reference_cards"] = get_products(con, cls, obj, vsn)
     return data_cls
 
 
@@ -157,12 +175,14 @@ def get_attributes(cls, dvs, vsn, type, isSupplier=False):
         # Доступные значения для атрибута
         if row["MND"] == 0:
             df_lst = vsn.loc[(vsn["CLS_ID"] == cls["CLS_ID"]) & (vsn["DVS_ID"] == row["DVS_ID"])]
-            sdv["available_values"] = df_lst["VALUE"].drop_duplicates().tolist()
+            df_lst = df_lst[["VALUE", "SYMSGN"]].drop_duplicates()
+            sdv["available_values"] = df_lst["VALUE"].tolist()
+            sdv["short_available_values"] = df_lst["SYMSGN"].fillna('').tolist()
         attributes.append(sdv)
     return attributes
 
 
-def get_products(cls, obj, vsn):
+def get_products(con, cls, obj, vsn):
     """Данные продуктовых карточек"""
     products = []
     df_obj_cls = obj.loc[obj["CLS_ID"] == cls["CLS_ID"]]
@@ -170,6 +190,7 @@ def get_products(cls, obj, vsn):
         product = {}
         product["name"] = row["FNAME"]
         product["short_name"] = row["SNAME"]
+        insert_names_into(con, row["FNAME"])
         # Описание ЭКТ
         product["description"] = ""
         # базовые атрибуты
@@ -216,3 +237,11 @@ def get_directories(df_lst):
         dir["values"] = df_lst.loc[df_lst["OD"] == row]["VALCHAR"].tolist()
         directories.append(dir)
     return directories
+
+
+def insert_names_into(con, name):
+    cur = con.cursor()
+    sql_insert = "insert into cs_art_load.pro_ns_temp  (val) values ('{nam}')"
+    print(sql_insert.format(nam=name))
+    cur.execute(sql_insert.format(nam=name))
+    con.commit()

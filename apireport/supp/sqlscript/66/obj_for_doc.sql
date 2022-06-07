@@ -12,12 +12,12 @@ with bcls as
        level top_level,
        clv.top_level clv_lev,
        connect_by_isleaf list
-from clv, cfv, prj 
+from (select * from clv where clv.cfv_id = :cfv_id and clv.status <> 2) clv, cfv, prj 
 where clv.cfv_id = cfv.cfv_id
   and prj.prj_id = cfv.prj_id
 start with clv.mlt_id = :mlt_id
   and clv.clf_id = :clf_id
-  and clv.cls_id = :cls_id
+  and (clv.cls_id = :cls_id or (:cls_id = -1 AND clv.clv_clf_id is null))
   and clv.cfv_id = :cfv_id
 connect by prior clv.mlt_id = clv.mlt_id
   and prior clv.cfv_id = clv.cfv_id 
@@ -144,7 +144,7 @@ where xcls.mlt_id = ocl.mlt_id
   and ocl.clf_id = oclp.clf_id
   and ocl.cls_id = oclp.cls_id
   and ocl.obj_id = oclp.obj_id
-  and oclp.name not like '%?%'
+  and oclp.fname not like '%?%'
   and oclp.prj_id = xcls.prj_id
   and obj.mlt_id = oum.mlt_id (+)
   and obj.obj_id = oum.obj_id (+)
@@ -186,7 +186,7 @@ where xcls.mlt_id = ocl.mlt_id
   and ocl.cls_id = oclp.cls_id
   and ocl.obj_id = oclp.obj_id
   and oclp.prj_id = xcls.prj_id
-  and oclp.name not like '%?%'
+  and oclp.fname not like '%?%'
   and obj.mlt_id = oum.mlt_id (+)
   and obj.obj_id = oum.obj_id (+)
   and obj.prj_id = oum.prj_id (+)

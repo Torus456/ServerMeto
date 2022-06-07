@@ -12,7 +12,7 @@ with bcls as
        level top_level,
        clv.top_level clv_lev,
        connect_by_isleaf list
-from (select * from clv where clv.cfv_id = :cfv_id and clv.status <> 2) clv, cfv, prj 
+from clv, cfv, prj 
 where clv.cfv_id = cfv.cfv_id
   and prj.prj_id = cfv.prj_id
 start with clv.mlt_id = :mlt_id
@@ -91,7 +91,7 @@ where bcls.mlt_id = nmpp.mlt_id
   and nmpp.clf_id = dvs.clf_id
   and nmpp.cls_id = dvs.cls_id
   and nmpp.prj_id = :prj_id
-  and regexp_like(nmpp.name||nmpp.fname,'{([^[{]*)\[&?'||dvs.dvs_id||'\]')
+  and regexp_like(nmpp.name,'{([^[{]*)\[&?'||dvs.dvs_id||'\]')
   and dvs.mlt_id = vds.mlt_id
   and dvs.clf_id = vds.clf_id
   and dvs.cls_id = vds.cls_id
@@ -103,8 +103,7 @@ where bcls.mlt_id = nmpp.mlt_id
   and dvs.clf_id = sdv.clf_id
   and dvs.cls_id = sdv.cls_id
   and dvs.sgn_id = sdv.sgn_id
-  and dvs.dvs_id = sdv.dvs_id  
-  and sdv.cfv_id = :cfv_id
+  and dvs.dvs_id = sdv.dvs_id
   and vds.mlt_id = vsn.mlt_id
   and vds.sgn_id = vsn.sgn_id
   and vds.vsn_id = vsn.vsn_id
@@ -117,7 +116,7 @@ where bcls.mlt_id = nmpp.mlt_id
                 and vds.dvs_id = vso.dvs_id
                 and vds.vsn_id = vso.vsn_id
                 and vso.mlt_id = 1
-                and vso.clf_id = :clf_id)),
+                and vso.clf_id = 3570)),
 zvsn as 
 (select distinct
         zvds.mlt_id,
@@ -131,18 +130,16 @@ zvsn as
         zvds.ord,
         case when zvds.vsn_id = 0 then 'Не требуется'
              when zvds.sgna_id = 511 then up_pulatov.return_values_ns(zvds.mlt_id, zvds.clf_id, zvds.cls_id, zvds.sgn_id, zvds.dvs_id, zvds.vsn_id, zvds.prj_id, zvds.sgna_id)
-             when zvds.cls_id = 13510319 and zvds.dvs_id = 16 then up_pulatov.return_values_ns(zvds.mlt_id, zvds.clf_id, zvds.cls_id, zvds.sgn_id, zvds.dvs_id, zvds.vsn_id, zvds.prj_id, zvds.sgna_id)
+             when zvds.mnd = 0 and zvds.val_mdn = 'vsna' then up_pulatov.return_values_ns(zvds.mlt_id, zvds.clf_id, zvds.cls_id, zvds.sgn_id, zvds.dvs_id, zvds.vsn_id, zvds.prj_id, zvds.sgna_id)
+             when zvds.mnd = 0 and zvds.val_mdn = 'symsgn' then zvds.symsgn
              when zvds.valtype = 0 and val_opt = 'valchar' then zvds.valchar
              else replace(regexp_replace(replace(to_char(zvds.valnum), ',', '.'), '^\.', '0.'), ',', '.') 
         end value,
         case when zvds.valtype = 1 then ''
              when zvds.sgna_id = 511 then ''
-             when zvds.cls_id = 13510319 and zvds.dvs_id = 16 then zvds.valchar
              when zvds.valtype = 0 and val_opt2 = 'vsna' then up_pulatov.return_values_ns(zvds.mlt_id, zvds.clf_id, zvds.cls_id, zvds.sgn_id, zvds.dvs_id, zvds.vsn_id, zvds.prj_id, zvds.sgna_id)
              when zvds.valtype = 0 and val_opt2 = 'symsgn' then zvds.symsgn
-             when zvds.mnd = 0 and zvds.val_mdn = 'vsna' then up_pulatov.return_values_ns(zvds.mlt_id, zvds.clf_id, zvds.cls_id, zvds.sgn_id, zvds.dvs_id, zvds.vsn_id, zvds.prj_id, zvds.sgna_id)
-             when zvds.mnd = 0 and zvds.val_mdn = 'symsgn' then zvds.symsgn             
-             else zvds.valchar /* to_char(sp_acceptor.return_values (zvds.mlt_id, zvds.clf_id, zvds.cls_id, zvds.prj_id, zvds.dvs_id, zvds.sgn_id, zvds.vsn_id, 1, 1)) */
+             else to_char(sp_acceptor.return_values (zvds.mlt_id, zvds.clf_id, zvds.cls_id, zvds.prj_id, zvds.dvs_id, zvds.sgn_id, zvds.vsn_id, 1, 1)) 
              end symsgn,
         zvds.cnt,     
         valchar,
@@ -191,7 +188,7 @@ where xcls.mlt_id = ocl.mlt_id
   and ocl.clf_id = oclp.clf_id
   and ocl.cls_id = oclp.cls_id
   and ocl.obj_id = oclp.obj_id
-  and oclp.fname not like '%?%'
+  and oclp.name not like '%?%'
   and oclp.prj_id = xcls.prj_id
   and obj.mlt_id = oum.mlt_id (+)
   and obj.obj_id = oum.obj_id (+)

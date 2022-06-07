@@ -11,14 +11,15 @@ from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
 
 
-def fill_dataframe(path, query, connect, project_args):
+def fill_dataframe(path, query, connect, project_args, replace_to=[]):
     """
     Заполнить датафрейм на основе запроса
     """
     SQL_QUERY = ""
-    print(query)
     with open(os.path.join(path, query), 'r', encoding="utf-8") as file:
         SQL_QUERY = file.read().replace('\n', ' ')
+    for fields in replace_to:
+        SQL_QUERY = SQL_QUERY.replace(str(fields[0]), str(fields[1]))
     df = pd.read_sql(SQL_QUERY, con=connect, params=project_args)
     result = df.where((pd.notnull(df)), None)
     return result
