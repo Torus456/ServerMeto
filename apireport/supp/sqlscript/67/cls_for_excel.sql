@@ -33,9 +33,7 @@ select bcls.mlt_id,
        bcls.clv_clf_id,
        bcls.clv_cls_id,
        bcls.name "Класс",
-       case when length(bcls.name) > 30 
-            then substr(bcls.name, 0, 29) || dense_rank() over (partition by bcls.name order by bcls.code)
-            else bcls.name end name30,
+       bcls.code name30,
        bcls.code,
        bcls.cfv_id,
        bcls.prj_id,
@@ -43,11 +41,15 @@ select bcls.mlt_id,
        bcls.clv_lev clv_lev,
        to_number(bcls.isleaf) isleaf,
        up_pulatov.gen_shbl_cls_ns(bcls.cfv_id, bcls.mlt_id, bcls.clf_id, bcls.cls_id, nmpp.sname, 1) sname,
-       up_pulatov.gen_shbl_cls_ns(bcls.cfv_id, bcls.mlt_id, bcls.clf_id, bcls.cls_id, nmpp.fname, 1) fname,
+       up_pulatov.gen_shbl_cls_ns(bcls.cfv_id, bcls.mlt_id, bcls.clf_id, bcls.cls_id, nmpp.fname, 1) "Шаблон",
        case when isleaf = 1
-            then up_pulatov.get_sdv_name_in_string(bcls.mlt_id, bcls.clf_id, bcls.cls_id, bcls.cfv_id, bcls.prj_id)
+            then up_pulatov.get_sdv_name_in_string(bcls.mlt_id, bcls.clf_id, bcls.cls_id, bcls.cfv_id, bcls.prj_id, 1)
             else null
        end listfname,
+       case when isleaf = 1
+            then up_pulatov.get_sdv_code_name_mapping(bcls.mlt_id, bcls.clf_id, bcls.cls_id, bcls.cfv_id, bcls.prj_id, 1)
+            else null
+       end mapfname,
        case when isleaf = 1 then ums.code
         else null end ums_code,
        case when isleaf = 1 then ums.name
