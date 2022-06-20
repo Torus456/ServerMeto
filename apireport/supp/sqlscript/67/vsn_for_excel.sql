@@ -232,7 +232,7 @@ unq as
 				 nvl(ums494.code, zdvs.ei_norm)  ei_norm,
 				 cls.name grp,
 				 nvl(art.artikul, '-') artikul,
-				 obj.sname descr,
+				 trim(';' from trim(obj.fname||'; '||obj.sname)) descr,
 				 (select clv.name 
 				 from clv
 				 where clv.mlt_id = bcls.mlt_id
@@ -347,14 +347,36 @@ from (select distinct mlt_id,
 					  ei_norm   as "ЕИ нормализованная",
 					  sname     as "Наименования краткое",
 					  fname     as "Наименования полное",
-            code name, 
+                      code name, 
 					  val ,
 					  normal    as "Итог нормализации",
-					  comm      as "Комментарий ИНКОН",
+					  listagg(comm, ';') within group (order by comm)     as "Комментарий ИНКОН",
 					  null      as "Комментарий заказчика",
 					  duble		  as "Дубль"
 					  
-		from unq)
+		from unq
+        GROUP BY      mlt_id, 
+                      clf_id,
+                      cls_id, 
+                      obj_id, 
+                      obj_name, 
+                      code_nsi, 
+                      ei, 
+                      grp, 
+                      artikul, 
+                      descr, 
+                      root,
+					  cls_name, 
+					  standard,
+					  spattern,
+					  fpattern,
+					  ei_norm,
+					  sname,
+					  fname,
+            code, 
+					  val,
+					  normal,					  
+					  duble	)
 pivot ( max(val)
 for (name) in (:DVSFIELDS:)
 )

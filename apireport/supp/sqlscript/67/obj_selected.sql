@@ -81,7 +81,7 @@ from
        ums.code "ЕИ",
        grp.name "Группа",
        art.artikul "Артикул",
-       obj.sname "Описание"           
+       trim(';' from trim(obj.fname||'; '||obj.sname)) "Описание"           
 from obj, 
      ocl, 
      xcls, 
