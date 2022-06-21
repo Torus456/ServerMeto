@@ -72,8 +72,8 @@ zcls
 zdvs AS (
          select zcls.clf_id_pp,
                 zcls.cls_id_pp,
-                zcls.code cls_code,
-                zcls.name cls_name,
+                bcls.code cls_code,
+                bcls.name cls_name,
                 dvs.mlt_id,
                 dvs.clf_id,
                 dvs.cls_id,
@@ -91,11 +91,14 @@ zdvs AS (
                 :inclf_id inclf_id,
                 :cst_id cst_id,
                 :aobj_id aobj_id  
-         from zcls, dvs, cum, ums, cum cum494, ums ums494
+         from bcls, zcls, dvs, cum, ums, cum cum494, ums ums494
          where dvs.mlt_id = 1
            and dvs.mlt_id = zcls.mlt_id
            and dvs.clf_id = zcls.clf_id
            and dvs.cls_id = zcls.cls_id
+           and zcls.mlt_id = bcls.mlt_id
+           and zcls.clf_id_pp = bcls.clf_id
+           and zcls.cls_id_pp = bcls.cls_id
            and zcls.mlt_id = cum.mlt_id (+)
            and zcls.clf_id_pp = cum.clf_id (+)
            and zcls.cls_id_pp = cum.cls_id (+)
