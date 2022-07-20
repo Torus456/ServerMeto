@@ -235,7 +235,7 @@ unq as
 				 nvl(ums494.code, zdvs.ei_norm)  ei_norm,
 				 cls.name grp,
 				 nvl(art.artikul, '-') artikul,
-				 trim(';' from trim(obj.fname||'; '||obj.sname)) descr,
+				 obj.sname descr,
 				 (select clv.name 
 				 from clv
 				 where clv.mlt_id = bcls.mlt_id
