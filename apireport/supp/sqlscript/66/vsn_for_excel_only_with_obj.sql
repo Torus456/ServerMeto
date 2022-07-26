@@ -58,8 +58,8 @@ zvds as
        dvs.mnd,
        dvs.sgn_id,
        dvs.dvs_id,
-       sdv.code sdvcode,
-       sdv.name sdvname,
+       sdv.code sdvname,
+       sdv.name sdvcode,
        sgn.valtype,
        vds.vsn_id,
        vsn.valchar,
@@ -91,7 +91,7 @@ where bcls.mlt_id = nmpp.mlt_id
   and nmpp.clf_id = dvs.clf_id
   and nmpp.cls_id = dvs.cls_id
   and nmpp.prj_id = :prj_id
-  and regexp_like(nmpp.fname,'{([^[{]*)\[&?'||dvs.dvs_id||'\]')
+  and regexp_like(nmpp.fname||nmpp.name,'{([^[{]*)\[&?'||dvs.dvs_id||'\]')
   and dvs.mlt_id = vds.mlt_id
   and dvs.clf_id = vds.clf_id
   and dvs.cls_id = vds.cls_id
@@ -153,6 +153,7 @@ xobj as
        cls_id,
        code,
        name,
+       obj_name,
        sname,
        fname,
        obj_id
@@ -162,6 +163,7 @@ from
        cls_id,
        code,
        name,
+       obj_name,
        sname,
        fname,
        obj_id,
@@ -174,7 +176,8 @@ from
        xcls.name,
        oclp.name sname,
        oclp.fname,
-       obj.obj_id
+       obj.obj_id,
+       obj.name obj_name
 from bcls xcls, ocl, obj, oclp, oum, ums
 where xcls.mlt_id = ocl.mlt_id
   and xcls.clf_id = ocl.clf_id
@@ -196,17 +199,24 @@ where xcls.mlt_id = ocl.mlt_id
   and obj.prj_id = oum.prj_id (+)
   and oum.cst_id (+) = :cst_id
   and oum.ums_id = ums.ums_id (+)
+  and not exists (select 1 
+                  from vobj 
+                  where vobj.mlt_id = obj.mlt_id
+                    and vobj.obj_id = obj.obj_id
+                    and vobj.aobj_id = 9291)
   and exists (select 1 from vobj 
               where obj.mlt_id = vobj.mlt_id
                 and obj.obj_id = vobj.obj_id
                 and vobj.aobj_id = :aobj_id)))
-where rn = 1),
+),
 unq as
 (select  xobj.mlt_id,
         xobj.clf_id,
         xobj.cls_id,
         xobj.code, 
         xobj.name,
+        xobj.obj_name,
+        xobj.sname,
         xobj.fname,
         xobj.obj_id,
         zvsn.dvs_id,
@@ -230,7 +240,7 @@ where xobj.mlt_id = ocl.mlt_id
   and vso.vsn_id = zvsn.vsn_id
   and zvsn.mnd = 1)
 select distinct *
-from (select distinct name "Класс", fname "Эталонная карточка", obj_id, sdvname, value from unq)
+from (select distinct obj_name "Наименование товара", fname "Краткое наименование", name "Тип продукта", obj_id, sdvname, value from unq)
 pivot ( max(value)
 for (sdvname) in (:DVSFIELDS:)
 )

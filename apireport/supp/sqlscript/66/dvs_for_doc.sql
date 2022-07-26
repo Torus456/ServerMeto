@@ -66,7 +66,7 @@ select distinct
        sdv.code,
        sdv.name,
        sdv.ord,
-       dvs.mnd,
+       sdv.mnd,
        case when sgn.valtype = 1 then ums.code else null end ums_code,
        case when sgn.valtype = 0 then 'Текстовый' 
             else 'Числовой' end valtype,

@@ -55,14 +55,6 @@ def fill_json_for_ns(data_js):
         else:
             newdict["information_models"] = []
             newdict["information_models"].append(get_data_cls(con, row, df_dvs, df_obj, df_vsn, df_lst))
-
-        # Если уровень 1 нужно его на первый уровень и забросить
-        # if lvl == 1:
-        #     prev_dict = temp_dict["catalog"]
-        # print(df_cls[["NAME", "CLV_LEV"]])
-        # print(row["NAME"] + " " + str(lvl) + " " + str(plvl))
-        # if (lvl < plvl):
-        #     print(row["NAME"] + " " + str(lvl) + " " + str(plvl))
         if (lvl >= plvl and row["ISLEAF"] != 1):
             if lvl != plvl:
                 prev_name = row["NAME"]
@@ -76,43 +68,11 @@ def fill_json_for_ns(data_js):
             prev_dict = dict_cls[prev_name][0]
             prev_dict.append(newdict)
             prev_dict = newdict["children"]
-                
-            # if plvl - lvl == 1:
-            #     prev_dict = dict_cls[prev_name][0]
-            #     prev_dict.append(newdict)
-            #     prev_dict = newdict["children"]
-            # elif plvl - lvl == 2:
-            #     prev_name = dict_cls[prev_name][1]
-            #     prev_dict = dict_cls[prev_name][0]
-            #     prev_dict.append(newdict)
-            #     prev_dict = newdict["children"]
-            # else:
-            #     prev_name = dict_cls[prev_name][1]
-            #     prev_name = dict_cls[prev_name][1]
-            #     prev_dict = dict_cls[prev_name][0]
-            #     prev_dict.append(newdict)
-            #     prev_dict = newdict["children"]
         else:
             prev_dict.append(newdict)
         plvl = lvl
-    # Для получения плоской таблицы классов
-    # for index, row in df_cls.iterrows():
-    #     newdict = {}
-    #     newdict["name"] = row["NAME"]
-    #     if (row["ISLEAF"] != 1):
-    #         newdict["children"] = []
-    #     else:
-    #         newdict["information_models"] = []
-
-    #     temp_dict["cls"].append(newdict)
-    # for i, row in enumerate(df_cls.itertuples(), 1):
-    #     print(row[6])
-        # if (root==0 or root != row.clv_cls_id):
-        #     root = row.clv_cls_id
-        #     cls["name"] = row.name
 
     temp_dict["attributes"] = get_data_attribute(df_dvs)
-    # temp_dict["directories"] = get_directories(df_lst)
     jstemp = json.dumps(
         temp_dict,
         sort_keys=False,
@@ -120,12 +80,9 @@ def fill_json_for_ns(data_js):
         ensure_ascii=False,
         separators=(',', ': ')
     )
-    # print(jstemp)
-    # print(type(jstemp))
     path_file = settings.BASE_DIR + "/upload/ns_" + "_" + str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) + ".json"
     with open(path_file, "w", encoding="utf-8") as file:
         file.write(jstemp)
-        # json.dump(jstemp, file)
     result["path_file"] = path_file
     result["name"] = str("NS_" + str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")))
     return result
@@ -190,7 +147,7 @@ def get_products(con, cls, obj, vsn):
         product = {}
         product["name"] = row["FNAME"]
         product["short_name"] = row["SNAME"]
-        insert_names_into(con, row["FNAME"])
+        # insert_names_into(con, row["FNAME"])
         # Описание ЭКТ
         product["description"] = ""
         # базовые атрибуты
