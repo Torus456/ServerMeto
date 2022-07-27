@@ -225,9 +225,13 @@ def fill_excel_comment_for_ink(data_js):
         "Комментарий заказчика",
         "Дубль"
     ]
+    DIRECTORY = '/mnt/t'  # - смонтированный для ИНК на 25 машине
+    # DIRECTORY = "P:/Проекты/Действующие/ИНК/Рабочая/Замечания от заказчика по нормализации/"
     result = {}
     path_to_file = data_js.get("file")
-    xls = pd.ExcelFile(path_to_file)
+    print(os.path.join(DIRECTORY, path_to_file))
+    print(path_to_file)
+    xls = pd.ExcelFile(os.path.join(DIRECTORY, path_to_file))
     sheet_names = xls.sheet_names
     df_all = []
     for sheet in sheet_names[2:]:

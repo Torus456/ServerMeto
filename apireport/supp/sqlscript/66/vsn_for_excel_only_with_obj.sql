@@ -174,7 +174,7 @@ from
        xcls.cls_id,
        xcls.code,
        xcls.name,
-       oclp.name sname,
+       oclp.sname,
        oclp.fname,
        obj.obj_id,
        obj.name obj_name
@@ -240,7 +240,7 @@ where xobj.mlt_id = ocl.mlt_id
   and vso.vsn_id = zvsn.vsn_id
   and zvsn.mnd = 1)
 select distinct *
-from (select distinct obj_name "Наименование товара", fname "Краткое наименование", name "Тип продукта", obj_id, sdvname, value from unq)
+from (select distinct fname "Наименование товара", sname "Краткое наименование", name "Тип продукта", obj_id, sdvname, value from unq)
 pivot ( max(value)
 for (sdvname) in (:DVSFIELDS:)
 )
