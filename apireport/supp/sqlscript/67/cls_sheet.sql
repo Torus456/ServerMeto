@@ -19,7 +19,6 @@ WITH bcls
                     AND mlt_id = :mlt_id
                     AND clf_id = :clf_id
                     AND (a.cls_id = :cls_id or (:cls_id = -1 AND a.clv_clf_id is null))
-                    AND a.code <> '96'
             CONNECT BY      PRIOR cfv_id = cfv_id
                          AND PRIOR mlt_id = mlt_id
                          AND PRIOR clf_id = clv_clf_id
