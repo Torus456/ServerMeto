@@ -296,11 +296,6 @@ where zdvs.mlt_id = dvs.mlt_id
   and obj.obj_id = oclp.obj_id
   and obj.prj_id = oclp.prj_id
   and obj.status = 1
-  and exists (select 1 
-             from cs_art_ink.obj ink
-             where ink.mlt_id = obj.mlt_id
-               and ink.obj_id = obj.obj_id
-               and ink.status = 1)
   and (oclp.clf_id = :inclf_id or (oclp.clf_id = 6 and not exists (select 1 
                           from ocl 
                           where vso.mlt_id = ocl.mlt_id

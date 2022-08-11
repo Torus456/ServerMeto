@@ -96,11 +96,6 @@ where xcls.mlt_id = ocl.mlt_id
   and ocl.mlt_id = obj.mlt_id
   and ocl.obj_id = obj.obj_id
   and obj.status = 1
-  and exists (select 1 
-             from cs_art_ink.obj ink
-             where ink.mlt_id = obj.mlt_id
-               and ink.obj_id = obj.obj_id
-               and ink.status = 1)
   and obj.prj_id = :prj_id
   and ocl.mlt_id = 1
   and ocl.clf_id = :inclf_id 
@@ -137,11 +132,6 @@ where xcls.mlt_id = ocl.mlt_id
   and ocl.mlt_id = obj.mlt_id
   and ocl.obj_id = obj.obj_id
   and obj.status = 1
-  and exists (select 1 
-             from cs_art_ink.obj ink
-             where ink.mlt_id = obj.mlt_id
-               and ink.obj_id = obj.obj_id
-               and ink.status = 1)
   and obj.prj_id = :prj_id
   and ocl.mlt_id = 1
   and ocl.clf_id = 6
