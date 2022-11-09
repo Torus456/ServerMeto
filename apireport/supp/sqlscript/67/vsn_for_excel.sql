@@ -246,7 +246,8 @@ unq as
 				 vcomm.valchar comm,
 				 replace_code_name(oclp.mlt_id, oclp.clf_id, oclp.cls_id, zdvs.cfv_id, oclp.fname, 1) as fname,
 				 replace_code_name(oclp.mlt_id, oclp.clf_id, oclp.cls_id, zdvs.cfv_id, oclp.sname, 1) as sname, 
-				 case when oclp.sname||oclp.fname like '%?%' then 'Ненормализовано' else 'Нормализовано' end normal,
+				 case  when obj.obj_id in (select q.obj_id from cs_art_load.ink_celev_no_nenormal q ) then 'Ненормализовано'
+               when oclp.sname||oclp.fname like '%?%' then 'Ненормализовано' else 'Нормализовано' end normal,
                  case when count( distinct obj.obj_id) over (PARTITION BY oclp.sname, nvl(ums494.code, zdvs.ei_norm)) > 1 and oclp.sname||oclp.fname not like '%?%' then 'Дубль' else null end  duble,                 
 				 sdv.code, 
 				 sdv.name, 
