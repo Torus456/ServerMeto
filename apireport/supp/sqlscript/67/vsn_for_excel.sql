@@ -132,7 +132,8 @@ zvsn as (select distinct zdvs.mlt_id,
                          67 prj_id,
                          vsn.valchar,
                          vsn.valnum,
-                         sgn.valtype
+                         sgn.valtype,
+                         vds.uion
         from zdvs, vds, vso, vsn, sgn 
         where zdvs.mlt_id = vds.mlt_id
           and zdvs.clf_id = vds.clf_id
@@ -171,7 +172,8 @@ zvsn as (select distinct zdvs.mlt_id,
                          67 prj_id,
                          vsn.valchar,
                          vsn.valnum,
-                         sgn.valtype
+                         sgn.valtype,
+                         vds.uion
         from zdvs, vds, vso, vsn, sgn
         where zdvs.mlt_id = vds.mlt_id
           and zdvs.clf_id = vds.clf_id
@@ -217,6 +219,7 @@ endval as
             then '<Не требуется>'
             when zdvs.valtype = 1
             then replace(regexp_replace(replace(to_char(zdvs.valnum), ',', '.'), '^\.', '0.'), '.', ',') 
+            when zdvs.uion = 1 then zdvs.valchar
             else regexp_replace(SP_ACCEPTOR.return_values(zdvs.mlt_id, zdvs.clf_id, zdvs.cls_id, zdvs.prj_id, zdvs.dvs_id, zdvs.sgn_id, zdvs.vsn_id,0), '^=', '''=') 
        end val
 from  zvsn zdvs),
