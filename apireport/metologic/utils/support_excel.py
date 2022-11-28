@@ -236,7 +236,7 @@ def fill_excel_comment_for_ink(data_js):
     for sheet in sheet_names[2:]:
         df = pd.read_excel(path_to_file, sheet_name=sheet)
         df['CODE'] = sheet
-        df = df[DATA_FIELDS]
+        # df = df[DATA_FIELDS]
         df_all.append(df)
     df_result = pd.concat(df_all, ignore_index=True)
     path_file = settings.BASE_DIR + "/upload/ink_" + "_" + str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) + ".xlsx"

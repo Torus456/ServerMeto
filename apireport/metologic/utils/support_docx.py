@@ -651,6 +651,100 @@ def create_docx64(data_js):
     return result
 
 
+def create_docx67(data_js):
+    """
+    Создаем методику по фрагменту
+    """
+    os.environ["NLS_LANG"] = '.AL32UTF8'
+    sql_path = settings.BASE_DIR + "/supp/sqlscript/67"
+    docs_path = settings.BASE_DIR + "/supp/word_template/" + "Schablon67.docx"
+    con = cx_Oracle.connect('CS_ART/CS_ART@192.168.54.17:1521/ORA5.INCON.LO')
+    result = {}
+    project_args = {
+        "MLT_ID": data_js.get("project_args").get("mlt_id"),
+        "CLF_ID": data_js.get("project_args").get("clf_id"),
+        "CLS_ID": data_js.get("project_args").get("cls_id"),
+        "CFV_ID": data_js.get("project_args").get("cfv_id"),
+        "PRJ_ID": data_js.get("project_args").get("prj_id")
+    }
+    project_args_obj = {
+        "MLT_ID": data_js.get("project_args").get("mlt_id"),
+        "CLF_ID": data_js.get("project_args").get("clf_id"),
+        "CLS_ID": data_js.get("project_args").get("cls_id"),
+        "CFV_ID": data_js.get("project_args").get("cfv_id"),
+        "PRJ_ID": data_js.get("project_args").get("prj_id"),
+        "INCLF_ID": data_js.get("project_args").get("inclf_id"),
+        "AOBJ_ID": data_js.get("project_args").get("aobj_id"),
+    }
+    # Классы, признаки, значения, объекты, оквед
+    df_cls = fill_dataframe(sql_path, 'cls_for_doc.sql', con, project_args)
+    df_dvs = fill_dataframe(sql_path, 'dvs_for_doc.sql', con, project_args)
+    df_vsn = fill_dataframe(sql_path, 'vsn_for_doc.sql', con, project_args_obj)
+    df_obj = fill_dataframe(sql_path, 'obj_dop_for_doc.sql', con, project_args_obj)
+    document = docx.Document(docs_path)
+    # добавляем параграф с оглавлением
+    add_table_of_contents(document)
+    document.add_page_break()
+
+    for row in df_cls.itertuples():
+        code = "XXX" if row.CODE is None else row.CODE
+        # descr = "" if row["DESCR"] is None else "(" + row["DESCR"] + ")"
+        document.add_heading(code + " - " + row.NAME, row.CLV_LEV)
+        cls_text = "«" + code + " - " + row.NAME + "»"
+        # document.add_paragraph().add_run().add_break()
+        if row.SNAME:
+            like_heading(document, "1. Схема условного обозначения класса " + cls_text)
+            add_project_template(document, row, row.INDICATOR)
+        df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
+        # Далее заполняем данные для класса
+        if row.CLV_LEV == 2:
+            like_heading(document, "2. Расшифровка класса " + cls_text)
+            # выбираем признаки для класса
+            df_attribute_cls = df_dvs.loc[df_dvs["CLS_ID"] == row.CLS_ID]
+            add_dvs_type_and_name(document, df_attribute_cls)
+            # Значения признаков
+            df_vsn_cls = df_vsn.loc[df_vsn["CLS_ID"] == row.CLS_ID]
+            add_object_value(document, df_vsn_cls)
+            document.add_paragraph().add_run().add_break()
+            if row.UMS_CODE:
+                add_table_of_ums(document, row)
+            # df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
+            if len(df_obj_cls) > 0:
+                document.add_paragraph().add_run().add_break()
+                like_heading(document, "3. Примеры сформированного наименования класса " + cls_text)
+                add_object_name_with_value(document, df_obj_cls, row.INDICATOR)
+        if row.SNAME:
+            document.add_page_break()
+    # Меняем в заголовке
+    for paragraph in document.paragraphs:
+        if ':КЛАСС:' in paragraph.text:
+            paragraph.text = "Класс: " + df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
+    text_footer = "Класс: " + df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
+    for section in document.sections:
+        footer = section.footer
+        if ':КЛАСС:' in footer.tables[0].cell(0, 0).text:
+            footer.tables[0].cell(0, 0).text = footer.tables[0].cell(0, 0).text.replace(":КЛАСС:", text_footer)
+            footer.tables[0].cell(0, 0).paragraphs[0].alignment = 1
+    path_file = (
+        settings.BASE_DIR +
+        "/upload/Metodika_" +
+        project_args.get("CLS_ID") +
+        "_" +
+        str(datetime.now().strftime("%Y-_%m-%d-%H_%M_%S")) +
+        ".docx"
+    )
+    document.save(path_file)
+    result["path_file"] = path_file
+    result["name"] = str(df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0])
+    return result
+
+
+def like_heading(document, header):
+    paragr = document.add_paragraph()
+    run = paragr.add_run(header)
+    run.bold = True
+
+
 def add_table_of_contents(document: object):
     """
     Добавляем оглавление. Создаем оглавление, которое нужно обновить вручную
@@ -697,7 +791,7 @@ def add_table_of_ums(document, row):
     cell.text = row.UMS_CODE
 
 
-def add_project_template(document, row):
+def add_project_template(document, row, indicator):
     """
     Добавляем в документ проектные шаблоны наименований
     """
@@ -715,6 +809,10 @@ def add_project_template(document, row):
     document.add_paragraph(
         row.FNAME
     )
+    if indicator > 0:
+        document.add_paragraph(
+            "где * – Необязательная характеристика (не требует обязательного заполнения)."
+        )
 
 
 def add_project_name(document, df_obj_cls):
@@ -763,7 +861,7 @@ def add_object_value(document, df_vsn_cls):
     document.add_paragraph().add_run().add_break()
     values = len(df_vsn_cls)
     p = document.add_paragraph(
-        "Примеры значений признаков (могут быть дополнены в ходе наполнения класса)",
+        "Примеры значений характеристик (могут быть дополнены в ходе наполнения класса)",
         style="List Bullet 2"
     )
     run = p.add_run()
@@ -771,18 +869,21 @@ def add_object_value(document, df_vsn_cls):
     run.font.size = Pt(12)
     run.underline = True
     # Значения признаков
-    table_vsn = document.add_table(rows=values + 1, cols=3)
+    table_vsn = document.add_table(rows=values + 1, cols=4)
     table_vsn.style = 'Table Grid'
     table_vsn.autofit = True
     # Шапка для таблицы значений признаков
     cell = table_vsn.cell(0, 0)
-    cell.text = "Наименование признака"
+    cell.text = "№ П/П"
     set_color_cell_header(cell, "Normal")
     cell = table_vsn.cell(0, 1)
-    cell.text = "Значение"
+    cell.text = "Наименование характеристики"
     set_color_cell_header(cell, "Normal")
     cell = table_vsn.cell(0, 2)
-    cell.text = "Обозначение"
+    cell.text = "Значение"
+    set_color_cell_header(cell, "Normal")
+    cell = table_vsn.cell(0, 3)
+    cell.text = "Расшифровка"
     set_color_cell_header(cell, "Normal")
     j = 1
     k = 1
@@ -790,21 +891,28 @@ def add_object_value(document, df_vsn_cls):
     union_name = "Наименование признака"
     for vsn in df_vsn_cls.itertuples():
         cell = table_vsn.cell(j, 0)
-        cell.text = vsn.NAME
+        cell.text = str(vsn.RN)
         cell = table_vsn.cell(j, 1)
-        cell.text = "" if vsn.VALUE is None else vsn.VALUE
+        cell.text = vsn.NAME
         cell = table_vsn.cell(j, 2)
+        cell.text = "" if vsn.VALUE is None else vsn.VALUE
+        cell = table_vsn.cell(j, 3)
         cell.text = "" if vsn.SYMSGN is None else vsn.SYMSGN
         # объединяем ячейки
         if union_name != vsn.NAME:
             union_name = vsn.NAME
+            union_number = vsn.RN
             start_union = j
             k = 1
         else:
-            a = table_vsn.cell(start_union, 0)
-            b = table_vsn.cell(start_union + k, 0)
+            a = table_vsn.cell(start_union, 1)
+            b = table_vsn.cell(start_union + k, 1)
+            c = table_vsn.cell(start_union, 0)
+            d = table_vsn.cell(start_union + k, 0)
             A = a.merge(b)
+            B = c.merge(d)
             A.text = union_name
+            B.text = str(union_number)
             k += 1
         j += 1
 
@@ -814,7 +922,7 @@ def add_dvs_type_and_name(document, df_attribute_cls):
     Добавляем в документ Наименования и тип ОД
     """
     p = document.add_paragraph(
-        "Перечень признаков класса ТМЦ",
+        "Перечень  характеристик  МТР",
         style="List Bullet 2"
     )
     run = p.add_run()
@@ -822,29 +930,68 @@ def add_dvs_type_and_name(document, df_attribute_cls):
     run.font.size = Pt(12)
     run.underline = True
     rows = len(df_attribute_cls)
-    table = document.add_table(rows=rows + 1, cols=2)
+    table = document.add_table(rows=rows + 1, cols=4)
     table.style = 'Table Grid'
     table.autofit = True
     # Шапка для таблицы признаков
     cell = table.cell(0, 0)
-    cell.text = "Наименование признака"
+    cell.text = "Наименование характеристики"
     set_color_cell_header(cell, "Normal")
     cell = table.cell(0, 1)
-    cell.text = "Тип признака"
+    cell.text = "Тип характеристики"
+    set_color_cell_header(cell, "Normal")
+    cell = table.cell(0, 2)
+    cell.text = "Обязательная"
+    set_color_cell_header(cell, "Normal")
+    cell = table.cell(0, 3)
+    cell.text = "Подчиненная"
     set_color_cell_header(cell, "Normal")
     cnt = 1
-    add_decription = False
     for attr in df_attribute_cls.itertuples():
         cell = table.cell(cnt, 0)
         cell.text = attr.NAME
-        if ("(Не обязательный)" in attr.NAME):
-            add_decription = True
-            cell.paragraphs[0].add_run('1')
-            cell.paragraphs[0].runs[1].font.superscript = True
         cell = table.cell(cnt, 1)
         cell.text = attr.VALTYPE
+        cell = table.cell(cnt, 2)
+        cell.text = attr.NEED
+        cell = table.cell(cnt, 3)
+        cell.text = attr.DEPEND
         cnt += 1
-    if add_decription:
+
+
+def add_object_name_with_value(document, df_obj_cls, indicator):
+    """
+    Добавляем проектные наименования и ЕИ
+    """
+    df_obj_cls = df_obj_cls.sort_values(by="SNAME")
+    df_obj = df_obj_cls[["OBJ_ID", "SNAME", "FNAME"]].drop_duplicates()    
+    for obj in df_obj.itertuples():
         document.add_paragraph(
-            "1 – Если значение признака не определено для записи материала, оно может быть не указано"
+            "  3.1 Краткое наименование"
         )
+        paragr = document.add_paragraph()
+        run = paragr.add_run(obj.SNAME)
+        run.bold = True
+        run.italic = True
+        df_obj_vsn = df_obj_cls.loc[df_obj_cls["OBJ_ID"] == obj.OBJ_ID].sort_values(by="ORD")
+        for vsn in df_obj_vsn.itertuples():
+            value = "" if vsn.VAL is None else vsn.VAL
+            document.add_paragraph(
+                "[" + vsn.NAME + "] - " + value
+            )
+        document.add_paragraph(
+            "  3.2 Полное наименование"
+        )
+        paragr = document.add_paragraph()
+        run = paragr.add_run(obj.FNAME)
+        run.bold = True
+        run.italic = True
+        for vsn in df_obj_vsn.itertuples():
+            value = "" if vsn.SVAL is None else vsn.SVAL
+            document.add_paragraph(                
+                "[" + vsn.NAME + "] - " + value
+            )
+        if indicator > 0:
+            document.add_paragraph(
+                "где * – Необязательная характеристика (не требует обязательного заполнения)."
+            )

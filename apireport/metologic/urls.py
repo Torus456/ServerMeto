@@ -11,5 +11,6 @@ urlpatterns = [
     url('get_northsteel_data_excel', views.get_northsteel_data_excel, name='get-northsteel-excel'),
     url('get_northsteel_data_template', views.get_northsteel_data_template, name='get-northsteel-template'),
     url('get_ink_data_excel', views.get_ink_data_excel, name='get-ink-excel'),
-    url('get_ink_vendor_comment', views.get_ink_vendor_comment, name='get-ink-comment')
+    url('get_ink_vendor_comment', views.get_ink_vendor_comment, name='get-ink-comment'),
+    url('ink_metodology', views.ink_metodology, name='ink-metodology'),
 ]
