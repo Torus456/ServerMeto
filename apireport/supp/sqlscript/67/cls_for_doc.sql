@@ -33,6 +33,7 @@ select bcls.mlt_id,
        bcls.cfv_id,
        bcls.prj_id,
        bcls.project_name,
+       bcls.isleaf,
        bcls.clv_lev,
        case when isleaf = 1 then 
             REPLACE(gen_shbl_cls_pp_ink (39, bcls.MLT_ID, bcls.CLF_ID, bcls.CLS_ID, nmpp.sname, 1), '&', '')

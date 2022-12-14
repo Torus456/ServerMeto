@@ -186,6 +186,7 @@ def parse_standarts_all_info(connection, df):
         response.close
     cur.close()
 
+
 def parse_yaspeller(request):
 
     '''
@@ -216,20 +217,15 @@ def update_check_orphograf(cur, data):
     sql_insert = """
         begin
             ap_standard.update_orph(:p_mlt_id,
-                                    :p_clf_id,
-                                    :p_cls_id,
-                                    :p_dvs_id,
                                     :p_sgn_id,
                                     :p_vsn_id,
                                     :haserror,
                                     :p_dop);
+            commit;
         end;
     """
     val = (
         data["MLT_ID"],
-        data["CLF_ID"],
-        data["CLS_ID"],
-        data["DVS_ID"],
         data["SGN_ID"],
         data["VSN_ID"],
         data["HASERROR"],
@@ -239,9 +235,9 @@ def update_check_orphograf(cur, data):
 
 
 def get_value_for_check(con):
-    SELECT_VALUE = """select a.mlt_id, a.clf_id, a.cls_id, dvs_id, a.sgn_id, a.vsn_id, a.val VALCHAR
-                    from cs_art_load.ink_check_orphograf a
-                    where a.val not like '%Отсутствует%'
+    SELECT_VALUE = """select a.mlt_id, a.sgn_id, a.vsn_id, a.valchar
+                    from cs_art_load.art_check_orphograf a
+                    where a.valchar not like '%Отсутствует%'
                     and a.status = 0"""
     df = pd.read_sql_query(SELECT_VALUE, con)
     return df
@@ -263,9 +259,6 @@ def get_error_yaspeller(con, df):
         data = {}
         if len(response.json()) == 0:
             data["MLT_ID"] = row["MLT_ID"]
-            data["CLF_ID"] = row["CLF_ID"]
-            data["CLS_ID"] = row["CLS_ID"]
-            data["DVS_ID"] = row["DVS_ID"]
             data["SGN_ID"] = row["SGN_ID"]
             data["VSN_ID"] = row["VSN_ID"]
             data["HASERROR"] = 0
@@ -275,9 +268,6 @@ def get_error_yaspeller(con, df):
             for i in range(len(response.json())):
                 text += ' '.join(response.json()[i]["s"])
             data["MLT_ID"] = row["MLT_ID"]
-            data["CLF_ID"] = row["CLF_ID"]
-            data["CLS_ID"] = row["CLS_ID"]
-            data["DVS_ID"] = row["DVS_ID"]
             data["SGN_ID"] = row["SGN_ID"]
             data["VSN_ID"] = row["VSN_ID"]
             data["HASERROR"] = len(response.json())

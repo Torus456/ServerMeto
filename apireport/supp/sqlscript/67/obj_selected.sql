@@ -96,7 +96,8 @@ where xcls.mlt_id = ocl.mlt_id
   and ocl.mlt_id = obj.mlt_id
   and ocl.obj_id = obj.obj_id
   and obj.status = 1
-  and obj.prj_id = :prj_id
+  and obj.prj_id = :prj_id  
+  and obj.cst_is <> 544
   and ocl.mlt_id = 1
   and ocl.clf_id = :inclf_id 
   and obj.mlt_id = ogrp.mlt_id (+)
@@ -131,7 +132,8 @@ where xcls.mlt_id = ocl.mlt_id
   and xcls.cls_id = ocl.cls_id
   and ocl.mlt_id = obj.mlt_id
   and ocl.obj_id = obj.obj_id
-  and obj.status = 1
+  and obj.status = 1  
+  and obj.cst_is <> 544
   and obj.prj_id = :prj_id
   and ocl.mlt_id = 1
   and ocl.clf_id = 6

@@ -697,7 +697,7 @@ def create_docx67(data_js):
             add_project_template(document, row, row.INDICATOR)
         df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
         # Далее заполняем данные для класса
-        if row.CLV_LEV == 2:
+        if row.ISLEAF == 1:
             like_heading(document, "2. Расшифровка класса " + cls_text)
             # выбираем признаки для класса
             df_attribute_cls = df_dvs.loc[df_dvs["CLS_ID"] == row.CLS_ID]

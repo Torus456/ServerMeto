@@ -299,6 +299,7 @@ where zdvs.mlt_id = dvs.mlt_id
   and obj.mlt_id = oclp.mlt_id
   and obj.obj_id = oclp.obj_id
   and obj.prj_id = oclp.prj_id
+  and obj.cst_id <> 544
   and obj.status = 1
   and (oclp.clf_id = :inclf_id or (oclp.clf_id = 6 and not exists (select 1 
                           from ocl 
