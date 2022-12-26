@@ -75,7 +75,11 @@ select distinct
                                        sdv.cls_id,
                                        sdv.sgn_id,
                                        sdv.dvs_id)) = '*' then 'Нет' else 'Да' end) need,
-       (case when sdv.sgn_id in (886587,886588,886589,886590,886591,886592,886593,886594,886595) then 'Да' else 'Нет' end) depend,
+       (case  when sdv.sgn_id in (886587,886588,886589,886590,886591,886592,886593,886594,886595) or
+                 ( sdv.cfv_id, sdv.mlt_id, sdv.clf_id, sdv.cls_id, sdv.sgn_id, sdv.dvs_id ) in 
+                 ( select q.cfv_id, q.mlt_id, q.clf_id, q.cls_id, q.sgn_id, q.dvs_id
+                   from cs_art_load.ink_podchinennye q)
+              then 'Да' else 'Нет' end) depend,
        :prj_id             
 from nclv b, sdv, sgn
 where b.mlt_id = sdv.mlt_id 
