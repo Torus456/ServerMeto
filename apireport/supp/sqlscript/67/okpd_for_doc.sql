@@ -32,7 +32,6 @@ WITH bcls
                                    CONNECT_BY_ROOT (cls.clf_id) root_clf,
                                    LEVEL lev,
                                    :prj_id prj_id,
-                                   :cst_id cst_id,
                                    :inclf_id inclf_id,
                                    :aobj_id aobj_id
                             FROM   cls

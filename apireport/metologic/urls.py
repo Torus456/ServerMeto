@@ -13,4 +13,5 @@ urlpatterns = [
     url('get_ink_data_excel', views.get_ink_data_excel, name='get-ink-excel'),
     url('get_ink_vendor_comment', views.get_ink_vendor_comment, name='get-ink-comment'),
     url('ink_metodology', views.ink_metodology, name='ink-metodology'),
+    url('sev_metodology', views.sev_metodology, name='sev-metodology'),
 ]
