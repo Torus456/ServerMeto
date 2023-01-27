@@ -1,0 +1,12 @@
+[flake8]
+ignore = D203,W504,C901
+max-line-length = 120
+exclude =
+    .git,
+    __pycache__,
+    old,
+    build,
+    dist,
+    */migrations/*,
+    */config/settings/*
+max-complexity = 10

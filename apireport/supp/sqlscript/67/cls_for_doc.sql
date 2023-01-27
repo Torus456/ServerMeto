@@ -10,8 +10,7 @@ with bcls as
        prj.prj_id,
        prj.name project_name,
        connect_by_isleaf isleaf,
-       level clv_lev,
-       clv.descr
+       level clv_lev
 from clv, cfv, prj
 where clv.cfv_id = cfv.cfv_id
   and prj.prj_id = cfv.prj_id
@@ -34,19 +33,22 @@ select bcls.mlt_id,
        bcls.cfv_id,
        bcls.prj_id,
        bcls.project_name,
+       bcls.isleaf,
        bcls.clv_lev,
-      case when isleaf = 1 then 
-       		sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id, 'sname',1)
-	    else null end sname,
-	    case when isleaf = 1 then
-		    sp_acceptor.return_templates_decoded(bcls.mlt_id, bcls.clf_id, bcls.cls_id, :cfv_id, bcls.prj_id, 'fname',1)
-	    else null end fname,
-	    case when isleaf = 1 then ums.code
-		  else null end ums_code,
-	    case when isleaf = 1 then ums.name
-	    else null end ums_name,
-      bcls.descr,
-	    :prj_id prj_id
+       case when isleaf = 1 then 
+            REPLACE(gen_shbl_cls_pp_ink (39, bcls.MLT_ID, bcls.CLF_ID, bcls.CLS_ID, nmpp.sname, 1), '&', '')
+       else null end sname,
+       case when isleaf = 1 then
+            REPLACE(gen_shbl_cls_pp_ink (39, bcls.MLT_ID, bcls.CLF_ID, bcls.CLS_ID, nmpp.fname, 1), '&', '')
+       else null end fname,
+       case when isleaf = 1 then  ums.code
+           else null end ums_code,
+       case when isleaf = 1 then  ums.name
+        else null end ums_name,
+       case when isleaf = 1 then REGEXP_COUNT(REPLACE(gen_shbl_cls_pp_ink (39, bcls.MLT_ID, bcls.CLF_ID, bcls.CLS_ID, nmpp.fname, 1), '&', ''), '\*')
+        else 0
+       end indicator,
+      :prj_id prj_id
 from bcls, nmpp, cum, ums 
 where bcls.mlt_id = nmpp.mlt_id (+) 
   and bcls.clf_id = nmpp.clf_id (+)
@@ -55,7 +57,7 @@ where bcls.mlt_id = nmpp.mlt_id (+)
   and bcls.mlt_id = cum.mlt_id (+)
   and bcls.clf_id = cum.clf_id (+) 
   and bcls.cls_id = cum.cls_id (+)  
-  and cum.cst_id (+) = 472
-  and cum.status (+) <> 2
+  and cum.cst_id (+) = 494
   and cum.ums_id = ums.ums_id (+)
 order by bcls.code
+

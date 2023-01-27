@@ -46,6 +46,7 @@ nclv as
                           bcls.cls_id,
                           nmpp.fname,
                           1) fname,
+                          nmpp.fname nsname,
                           nmpp.fname nfname
 from bcls, nmpp
 where bcls.mlt_id = nmpp.mlt_id 
@@ -64,24 +65,28 @@ select distinct
        sgn.sgn_id,
        sdv.dvs_id,
        sdv.code,
-       sdv.name || case when sd.dvs_id is not null then '(Не обязательный)' else null end name,
+       sdv.name,
        sdv.ord,
-       coalesce(dtype.new_type, case when sgn.valtype = 0 then 'Текстовый' 
-             else 'Числовой' end) valtype     
-from nclv b, sdv, sgn, cs_art_load.sinara_not_needs_od sd, cs_art_load.sinara_change_type dtype
+       (case when sgn.valtype = 0 then 'Текстовый'
+            else 'Числовой' end) valtype,
+       (case when (up_pulatov.ink_get_define_mnd(sdv.cfv_id,
+                                       sdv.mlt_id,
+                                       sdv.clf_id,
+                                       sdv.cls_id,
+                                       sdv.sgn_id,
+                                       sdv.dvs_id)) = '*' then 'Нет' else 'Да' end) need,
+       (case  when sdv.sgn_id in (886587,886588,886589,886590,886591,886592,886593,886594,886595) or
+                 ( sdv.cfv_id, sdv.mlt_id, sdv.clf_id, sdv.cls_id, sdv.sgn_id, sdv.dvs_id ) in 
+                 ( select q.cfv_id, q.mlt_id, q.clf_id, q.cls_id, q.sgn_id, q.dvs_id
+                   from cs_art_load.ink_podchinennye q)
+              then 'Да' else 'Нет' end) depend,
+       :prj_id             
+from nclv b, sdv, sgn
 where b.mlt_id = sdv.mlt_id 
   and b.clf_id = sdv.clf_id 
   and b.cls_id = sdv.cls_id
   and b.cfv_id = sdv.cfv_id
-  and sdv.mlt_id = sd.mlt_id (+)
-  and sdv.clf_id = sd.clf_id (+)
-  and sdv.cls_id = sd.cls_id (+)
-  and sdv.dvs_id = sd.dvs_id (+)
-  and sdv.clf_id = dtype.clf_id (+)
-  and sdv.cls_id = dtype.cls_id (+)
-  and sdv.sgn_id = dtype.sgn_id (+)
-  and sdv.dvs_id = dtype.dvs_id (+)
   and sdv.mlt_id = sgn.mlt_id
   and sdv.sgn_id = sgn.sgn_id
-  and regexp_like(b.nfname,'{([^[{]*)\[&?'||sdv.dvs_id|| '\]')
+  and REGEXP_LIKE (nsname || b.nfname, '\[.?'||sdv.DVS_ID||'\]')
 order by b.code, sdv.ord

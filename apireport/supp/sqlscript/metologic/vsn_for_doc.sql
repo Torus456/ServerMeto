@@ -37,8 +37,9 @@ bsdv as (
            bcls.name cls_name,
            sdv.ord,
            sgn.valtype,
-           sgn.name sgn_name
-    from sdv, bcls, sgn  
+           sgn.name sgn_name, 
+           REGEXP_COUNT(p.fname||p.sname, '\[.?'||sdv.dvs_id||'\]\[#') only_dop
+    from sdv, bcls, sgn, nmpp p  
     where sdv.mlt_id = bcls.mlt_id
       and sdv.clf_id = bcls.clf_id
       and sdv.cls_id = bcls.cls_id
@@ -46,14 +47,11 @@ bsdv as (
       and sdv.mlt_id = sgn.mlt_id
       and sdv.sgn_id = sgn.sgn_id
       and bcls.list = 1
-      and exists (select 1
-                  from nmpp p
-                  where sdv.mlt_id = p.mlt_id
-                    and sdv.clf_id = p.clf_id
-                    and sdv.cls_id = p.cls_id
-                    and p.prj_id = bcls.prj_id
-                    and REGEXP_LIKE (p.fname, '\[.?'||sdv.dvs_id||'\]')) 
-),
+      and sdv.mlt_id = p.mlt_id
+      and sdv.clf_id = p.clf_id
+      and sdv.cls_id = p.cls_id
+      and p.prj_id = bcls.prj_id
+      and REGEXP_LIKE (p.fname, '\[.?'||sdv.dvs_id||'\]')),
 zdvs as 
 (select *
      from (select   distinct
@@ -130,10 +128,19 @@ zvsn as
                        else replace(regexp_replace(to_char(vsn.valnum), '^\.', '0.'), '.', ',') 
                   end
         end value,
-        sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1) symsgn,
+        case when bsdv.only_dop = 2 
+             then nvl(replace(sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1), '<Не требуется>', 'Не требуется'), replace(sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,0), '<Не требуется>', 'Не требуется'))
+             else sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1) end symsgn,
+         case when vsn.vsn_id = 0 then vsn.symsgn
+             else case when bsdv.valtype = 0 then vsn.valchar
+                       else replace(regexp_replace(to_char(vsn.valnum), '^\.', '0.'), '.', ',') 
+                  end
+        end valchar,
         :inclf_id inclf_id,
         obj.obj_id,
-        xdvs.multival_sep
+        xdvs.multival_sep,
+        vsn.vsn_id,
+        bsdv.only_dop
 from bsdv, 
      xdvs, 
      obj,
@@ -169,10 +176,6 @@ where bsdv.mlt_id = xdvs.mlt_id
   and oclp.fname||oclp.sname not like '%?%'
   and obj.prj_id = bsdv.prj_id
   and obj.status = 1
-  and exists (select 1 from vobj q 
-              where obj.mlt_id = q.mlt_id
-                and obj.obj_id = q.obj_id
-                and q.aobj_id = 9274)
   and exists (select 1 
              from vobj
              where vobj.aobj_id = :aobj_id
@@ -200,10 +203,19 @@ select distinct  bsdv.mlt_id,
                        else replace(regexp_replace(to_char(vsn.valnum), '^\.', '0.'), '.', ',') 
                   end
         end value,
-        sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1) symsgn,
+        case when bsdv.only_dop = 2 
+             then nvl(replace(sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1), '<Не требуется>'), replace(sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,0), '<Не требуется>'))
+             else sp_acceptor.return_values (bsdv.mlt_id, bsdv.clf_id, bsdv.cls_id, bsdv.prj_id, bsdv.dvs_id, bsdv.sgn_id, vsn.vsn_id,1) end symsgn,
+        case when vsn.vsn_id = 0 then vsn.symsgn
+             else case when bsdv.valtype = 0 then vsn.valchar
+                       else replace(regexp_replace(to_char(vsn.valnum), '^\.', '0.'), '.', ',') 
+                  end
+        end valchar,
         :inclf_id inclf_id,
         obj.obj_id,
-        xdvs.multival_sep
+        xdvs.multival_sep,
+        vsn.vsn_id,
+        bsdv.only_dop
 from bsdv, 
      xdvs, 
      obj,
@@ -244,10 +256,6 @@ where bsdv.mlt_id = xdvs.mlt_id
                   where ocl.mlt_id = oclin.mlt_id
                     and ocl.obj_id = oclin.obj_id
                     and oclin.clf_id = :inclf_id)
-  and exists (select 1 from vobj q 
-              where obj.mlt_id = q.mlt_id
-                and obj.obj_id = q.obj_id
-                and q.aobj_id = 9274)
   and exists (select 1 
              from vobj
              where vobj.aobj_id = :aobj_id
@@ -269,10 +277,67 @@ select distinct q.mlt_id,
         q.name,
         q.ord,
         q.valtype, 
+        case when q.sgn_id = 8222 then NVL(q.symsgn, q.value)
+             when nvl(z.iskl, 0) = 1 then NVL(q.symsgn, q.value)
+             when (q.only_dop = 2 AND LENGTH(q.value) = LENGTH(q.symsgn)) then REPLACE(q.symsgn, '<Отсутствует>', q.value) 
+             when replace(q.value, '.', ',') = replace(q.symsgn, '.', ',') then q.symsgn
+        else REPLACE(q.value, '<Отсутствует>', '   ')
+        end value,
+        case 
+             when q.cnt > 0 then REPLACE(q.symsgn, '<Отсутствует>', '   ') 
+             when q.sgn_id = 8222 then '   '
+             when nvl(z.iskl, 0) = 1 then '   '
+             when q.cnt_compare > 0 then REPLACE(q.symsgn, '<Отсутствует>', '   ')
+             when (q.only_dop = 2 AND LENGTH(q.value) = LENGTH(q.symsgn)) then '   '             
+             when replace(q.value, '.', ',') = replace(q.symsgn, '.', ',') then '   ' 
+             when q.value = q.symsgn then '   '
+             else REPLACE(q.symsgn, '<Отсутствует>', '   ') 
+        end symsgn,
+        q.inclf_id,
+        q.vsn_id,
+        q.only_dop
+from
+(select q.mlt_id,
+        q.clf_id,
+        q.cls_id,
+        q.cfv_id,
+        q.cls_code,
+        q.cls_name,
+        q.prj_id,
+        q.sgn_id,
+        q.dvs_id,
+        q.code,
+        q.name,
+        q.ord,
+        q.valtype, 
         q.value,
         q.symsgn,
-        q.inclf_id
-from 
+        q.vsn_id,
+        q.inclf_id,
+        q.obj_id,
+        q.only_dop,
+        count(case when  symsgn = '<Отсутствует>' then 1 else null end) over (partition by q.mlt_id,
+        q.clf_id,
+        q.cls_id,
+        q.cfv_id,
+        q.cls_code,
+        q.cls_name,
+        q.prj_id,
+        q.sgn_id,
+        q.dvs_id) cnt,
+        count(case when q.vsn_id = 0 then null
+                when  replace(replace(trim(q.value), '.', ','), 'М', 'M') <> replace(replace(trim(q.symsgn), '.', ','), 'М', 'M')  then 1 
+                else null end) over (partition by q.mlt_id,
+        q.clf_id,
+        q.cls_id,
+        q.cfv_id,
+        q.cls_code,
+        q.cls_name,
+        q.prj_id,
+        q.sgn_id,
+        q.dvs_id) cnt_compare
+         
+from   
 (select  zvsn.mlt_id,
         zvsn.clf_id,
         zvsn.cls_id,
@@ -286,10 +351,15 @@ from
         zvsn.name,
         zvsn.ord,
         zvsn.valtype, 
-        LISTAGG(zvsn.value, zvsn.multival_sep) within group (ORDER BY zvsn.value) value,
-        LISTAGG(zvsn.symsgn, zvsn.multival_sep) within group (ORDER BY zvsn.value) symsgn,
+        LISTAGG(zvsn.valchar, zvsn.multival_sep) within group (ORDER BY zvsn.value) value,
+        LISTAGG( case when zvsn.valchar = zvsn.value then zvsn.symsgn
+                      else NVL(zvsn.value,zvsn.symsgn)
+                 end, zvsn.multival_sep
+        ) within group (ORDER BY zvsn.value) symsgn,
+        LISTAGG(zvsn.vsn_id, zvsn.multival_sep) within group (ORDER BY zvsn.vsn_id) vsn_id,
         zvsn.inclf_id,
-        zvsn.obj_id  
+        zvsn.obj_id,
+        zvsn.only_dop         
 from zvsn
 group by  zvsn.mlt_id,
         zvsn.clf_id,
@@ -306,5 +376,10 @@ group by  zvsn.mlt_id,
         zvsn.valtype,
         zvsn.inclf_id,
         zvsn.obj_id,
-        zvsn.multival_sep) q
-order by cls_code, ord
+        zvsn.multival_sep,
+        zvsn.only_dop) q) q,  cs_art_load.sinara_only_dop z
+where q.clf_id = z.clf_id (+)
+  and q.cls_id = z.cls_id (+)
+  and q.sgn_id = z.sgn_id (+)
+  and q.dvs_id = z.dvs_id (+) 
+order by cls_code, ord, case when vsn_id like '0%' then null else '1' end, 14

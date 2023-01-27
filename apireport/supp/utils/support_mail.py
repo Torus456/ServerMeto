@@ -21,7 +21,6 @@ def sendmail(address_mail, subject_mail, text_mail, file_attachment, name_attach
     EMAIL_HOST_PASSWORD = "Schpil59Do"
     # EMAIL_USE_TLS = True
     DEFAULT_FROM_EMAIL = 'support@incon.ru'
-    # SUBJECT = "Согласование материалов"
     file_to_attach = file_attachment  # os.path.join(settings.BASE_DIR, "Instruction.docx")
     addresses = []
     addresses.append(address_mail)
@@ -31,20 +30,25 @@ def sendmail(address_mail, subject_mail, text_mail, file_attachment, name_attach
     msg['Subject'] = Header(subject_mail, 'utf-8')
     msg['From'] = DEFAULT_FROM_EMAIL
     msg['To'] = ','.join(addresses)
-    name_attachment = name_attachment + ".docx"
-    header = 'Content-Disposition', 'attachment; filename="%s"' % name_attachment #'Galka_Instruction.docx'
-    attachment = MIMEBase('application', "octet-stream")
-    try:
-        with open(file_to_attach, "rb") as fh:
-            data = fh.read()
-        attachment.set_payload(data)
-        encoders.encode_base64(attachment)
-        attachment.add_header(*header)
-        msg.attach(attachment)
-    except IOError:
-        msg = "Error opening attachment file %s" % file_to_attach
-        print(msg)
-        sys.exit(1)
+    body = MIMEText(text_mail, 'plain')
+    # msg.set_payload(body)
+    if name_attachment:
+        name_attachment = name_attachment # + ".docx"
+        mail_coding = 'utf-8'
+        att_header = Header(name_attachment, mail_coding)
+        header = 'Content-Disposition', 'attachment; filename="%s"' % att_header.encode('utf-8')
+        attachment = MIMEBase('application', "octet-stream")
+        try:
+            with open(file_to_attach, "rb") as fh:
+                data = fh.read()
+            attachment.set_payload(data)
+            attachment.add_header(*header)
+            encoders.encode_base64(attachment)
+            msg.attach(attachment)
+        except IOError:
+            msg = "Error opening attachment file %s" % file_to_attach
+            print(msg)
+            sys.exit(1)
     smtpObj = smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=60)
     smtpObj.login(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
     smtpObj.sendmail(DEFAULT_FROM_EMAIL, addresses, msg.as_string())
