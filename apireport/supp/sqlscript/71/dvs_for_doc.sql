@@ -15,7 +15,7 @@ where clv.cfv_id = cfv.cfv_id
   and prj.prj_id = cfv.prj_id
   and prj.prj_id = :prj_id
 start with clv.mlt_id = :mlt_id
-  and clv.clf_id = :clf_id
+  and clv.clf_id in (:clf_id, :inclf_id)
   and clv.cls_id = :cls_id
   and clv.cfv_id = :cfv_id
 connect by prior clv.mlt_id = clv.mlt_id
@@ -69,7 +69,7 @@ select distinct
        case when sgn.valtype = 1 then ums.code else null end ums_code,
        case when sgn.valtype = 0 then 'Текстовый' 
 			else 'Числовой' end valtype,
-	  :cst_id
+	  547 cst_id
 from nclv b, sdv, sgn, ums 
 where b.mlt_id = sdv.mlt_id 
   and b.clf_id = sdv.clf_id 

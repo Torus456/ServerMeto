@@ -15,4 +15,5 @@ urlpatterns = [
     url('ink_metodology', views.ink_metodology, name='ink-metodology'),
     url('sev_metodology', views.sev_metodology, name='sev-metodology'),
     url('get_unipro_data_excel', views.get_unipro_data_excel, name='get-unipro-excel'),
+    url('mag_metodology', views.mag_metodology, name='mag-metodology'),
 ]
