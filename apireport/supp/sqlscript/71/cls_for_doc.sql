@@ -39,7 +39,7 @@ connect by prior clv.mlt_id = clv.mlt_id
             ELSE gen_shbl_cls_pp2 (45,bcls.MLT_ID,bcls.CLF_ID,bcls.CLS_ID,nmpp.name,1) END sname_uni,
        CASE WHEN nmpp.name LIKE '%разделитель%' THEN gen_shbl_cls_pp2 (45,bcls.MLT_ID,bcls.CLF_ID,bcls.CLS_ID,SUBSTR(nmpp.name,INSTR(nmpp.name,'=разделитель=',1)+13),1)
             ELSE gen_shbl_cls_pp2 (45,bcls.MLT_ID,bcls.CLF_ID,bcls.CLS_ID,nmpp.name,1) END fname_uni,
-       gen_shbl_cls_pp2 (45,bcls.MLT_ID,bcls.CLF_ID,bcls.CLS_ID,nmpp.name,1) name,                       
+       gen_shbl_cls_pp2 (45,bcls.MLT_ID,bcls.CLF_ID,bcls.CLS_ID,nmpp.name,1) name_sh,                       
        gen_shbl_cls_pp2(45, bcls.mlt_id, bcls.clf_id, bcls.cls_id, nmpp.sname, 1) sname,
        gen_shbl_cls_pp2(45, bcls.mlt_id, bcls.clf_id, bcls.cls_id, nmpp.fname, 1) fname,
        case when isleaf = 1 then  ums.code
