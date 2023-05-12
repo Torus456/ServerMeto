@@ -72,6 +72,7 @@ SELECT xcls.mlt_id
 , clsb.code code_at
 , clsb.name znach_at
 , :prj_id
+, 'Текстовый' tip
 FROM xcls, car carb, cls clsb, cas
 WHERE carb.cas_id in (348,345)
 AND xcls.mlt_id = carb.mlt_id
@@ -97,6 +98,7 @@ SELECT xcls.mlt_id
 , clsb.code code_at
 , clsb.name znach_at
 , :prj_id
+, 'Текстовый' tip
 FROM xcls, car carb, cls clsb, cas
 WHERE carb.cas_id in (347,344)
 AND xcls.mlt_id = carb.mlt_id
@@ -122,6 +124,7 @@ SELECT xcls.mlt_id
 , clsb.code code_at
 , clsb.name znach_at
 , :prj_id
+, 'Текстовый' tip
 FROM xcls, car carb, cls clsb, cas
 WHERE carb.cas_id in (346,343)
 AND xcls.mlt_id = carb.mlt_id
@@ -136,4 +139,4 @@ AND cas.clf_id = carb.clf_id
 AND carb.ass_mlt_id = cas.ass_mlt_id
 AND carb.ass_clf_id = cas.ass_clf_id
 
-order by 4, 6
+order by 4, 6 DESC

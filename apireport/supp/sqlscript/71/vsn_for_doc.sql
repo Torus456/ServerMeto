@@ -167,7 +167,26 @@ endval as
        SP_ACCEPTOR.return_values(zdvs.mlt_id, zdvs.clf_id, zdvs.cls_id, zdvs.prj_id, zdvs.dvs_id, zdvs.sgn_id, zdvs.vsn_id,0) val
 from  zvsn zdvs)
 
-SELECT DISTINCT sdv.cfv_id,
+select q.cfv_id,
+       q.mlt_id,
+       q.clf_id,
+       q.cls_id, 
+       q.sgn_id,
+       q.dvs_id,
+       q.vsn_id,
+       q.prj_id,
+       q.code_od,
+       q.name,
+       q.code,
+       q.name_cl,
+       q.val,
+       q.sval,
+       q.ord,
+       case when sgn.valtype = 1 then to_char(vsn.valnum, '99999999999d9999') 
+            when regexp_like(lower(q.name), 'дюйм|градус') and regexp_like(vsn.valchar, '[0-9]*[\.,]?*[0-9]') then up_pulatov.ink_to_number(vsn.valchar)
+            else vsn.valchar 
+            end ord_val
+from (SELECT DISTINCT sdv.cfv_id,
                       sdv.mlt_id,
                       sdv.clf_id,
                       sdv.cls_id, 
@@ -211,6 +230,11 @@ where c.mlt_id = a.mlt_id
   and a.sgn_id = vsn.sgn_id
   and a.vsn_id = vsn.vsn_id
   and nmpp.prj_id = :prj_id
-  and REGEXP_LIKE (nmpp.sname || nmpp.fname, '\[&?' || sdv.dvs_id || '\]')
+  and REGEXP_LIKE (nmpp.sname || nmpp.fname, '\[&?' || sdv.dvs_id || '\]')) q, vsn, sgn
+  where q.mlt_id = vsn.mlt_id
+  and q.sgn_id = vsn.sgn_id
+  and q.vsn_id = vsn.vsn_id
+  and sgn.mlt_id = vsn.mlt_id
+  and sgn.sgn_id = vsn.sgn_id
   
-  order by code, ord, val
+  order by code, ord, ord_val, val

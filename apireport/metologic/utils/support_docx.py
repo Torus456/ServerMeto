@@ -32,7 +32,7 @@ def set_color_cell_header(cell, style):
     cell = cell
     cell.paragraphs[0].style = style
     cell.paragraphs[0].alignment = 1
-    cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="5b92e5"/>'.format(nsdecls('w'))))
+    cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="dbdbdb"/>'.format(nsdecls('w'))))
 
 
 def create_docx_with_tepmplate(data_js):
@@ -1267,7 +1267,7 @@ def create_docx71(data_js):
     """
     os.environ["NLS_LANG"] = '.AL32UTF8'
     sql_path = settings.BASE_DIR + "/supp/sqlscript/71"
-    docs_path = settings.BASE_DIR + "/supp/word_template/" + "Schablon67.docx"
+    docs_path = settings.BASE_DIR + "/supp/word_template/" + "Schablon70.docx"
     con = cx_Oracle.connect('CS_ART/CS_ART@192.168.54.17:1521/ORA5.INCON.LO')
     result = {}
     project_args = {
@@ -1278,21 +1278,21 @@ def create_docx71(data_js):
         "PRJ_ID": data_js.get("project_args").get("prj_id"),
         "INCLF_ID": data_js.get("project_args").get("inclf_id"),
     }
-    #project_args_obj = {
-    #    "MLT_ID": data_js.get("project_args").get("mlt_id"),
-    #   "CLF_ID": data_js.get("project_args").get("clf_id"),
-    #    "CLS_ID": data_js.get("project_args").get("cls_id"),
-    #    "CFV_ID": data_js.get("project_args").get("cfv_id"),
-    #    "PRJ_ID": data_js.get("project_args").get("prj_id"),
-    #    "INCLF_ID": data_js.get("project_args").get("inclf_id"),
-        #"AOBJ_ID": data_js.get("project_args").get("aobj_id"),
-    #}
+    project_args_obj = {
+        "MLT_ID": data_js.get("project_args").get("mlt_id"),
+       "CLF_ID": data_js.get("project_args").get("clf_id"),
+        "CLS_ID": data_js.get("project_args").get("cls_id"),
+        "CFV_ID": data_js.get("project_args").get("cfv_id"),
+        "PRJ_ID": data_js.get("project_args").get("prj_id"),
+        "INCLF_ID": data_js.get("project_args").get("inclf_id"),
+        "AOBJ_ID": data_js.get("project_args").get("aobj_id"),
+    }
     # Классы, признаки, значения, объекты, оквед
     df_cls = fill_dataframe(sql_path, 'cls_for_doc.sql', con, project_args)
     df_dvs = fill_dataframe(sql_path, 'dvs_for_doc.sql', con, project_args)
     df_vsn = fill_dataframe(sql_path, 'vsn_for_doc.sql', con, project_args)
     df_obj = fill_dataframe(sql_path, 'obj_for_doc.sql', con, project_args)
-    #df_obj_uni = fill_dataframe(sql_path, 'obj_for_doc.sql', con, project_args_obj)
+    df_obj_uni = fill_dataframe(sql_path, 'obj_for_doc_uni.sql', con, project_args_obj)
     df_dop = fill_dataframe(sql_path, 'dop_for_doc.sql', con, project_args)
     document = docx.Document(docs_path)
     # добавляем параграф с оглавлением
@@ -1305,50 +1305,73 @@ def create_docx71(data_js):
         document.add_heading(code + " - " + row.NAME, row.CLV_LEV)
         cls_text = "«" + code + " - " + row.NAME + "»"
         # document.add_paragraph().add_run().add_break()
-        #if row.SNAME:
-        #    like_heading(document, "1. Схема условного обозначения класса ")
-        #    add_project_template(document, row)
-        #df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
         # Далее заполняем данные для класса
-        if row.SNAME:
-            document.add_paragraph().add_run().add_break()
-        df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
+        #if row.SNAME:
+        #    document.add_paragraph().add_run().add_break()
+        #df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
+        
         if row.ISLEAF == 1:
-            like_heading(document, "1. Расшифровка класса ")
+            #like_heading(document, "1. Расшифровка класса ")
             # выбираем признаки для класса
+            document.add_paragraph().add_run().add_break()
             df_attribute_cls = df_dvs.loc[df_dvs["CLS_ID"] == row.CLS_ID]
             add_dvs_type_and_name(document, df_attribute_cls)
             # Значения признаков
             df_vsn_cls = df_vsn.loc[df_vsn["CLS_ID"] == row.CLS_ID]
             add_object_value(document, df_vsn_cls)
             document.add_paragraph().add_run().add_break()
+            # Тип атрибута
+            df_dop_type_cls = df_dop.loc[df_dop["CLS_ID"] == row.CLS_ID]
+            add_dop_values(document, df_dop_type_cls)
+            document.add_paragraph().add_run().add_break()
             # Значения атрибутов
             df_dop_attribute_cls = df_dop.loc[df_dop["CLS_ID"] == row.CLS_ID]
             add_dop_type_and_name(document, df_dop_attribute_cls)
+            document.add_paragraph().add_run().add_break()
             if row.UMS_CODE:
                 add_table_of_ums(document, row)
             # df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
-            if len(df_obj_cls) > 0:
+            #Шаблоны универсальной записи
+            if row.SNAME:
                 document.add_paragraph().add_run().add_break()
-                like_heading(document, "2. Примеры сформированного наименования класса ")
-                add_object_name_with_value(document, df_obj_cls)
-        if row.SNAME:
-            document.add_paragraph().add_run().add_break()
-            like_heading(document, "3. Схема условного обозначения класса ")
-            add_project_template(document, row)
-        df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
+                #like_heading(document, "3. Схема условного обозначения класса ")
+                add_project_template_uni(document, row)
+            df_obj_uni_cls = df_obj_uni.loc[df_obj_uni["CLS_ID"] == row.CLS_ID]
+            #Шаблоны частной записи
+            if row.SNAME:
+                #document.add_paragraph().add_run().add_break()
+                #like_heading(document, "3. Схема условного обозначения класса ")
+                add_project_template(document, row)
+            df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
+            #Примеры краткого и полного наименований универсальной записи
+            if len(df_obj_uni_cls) > 0:
+                add_project_name_uni(document, df_obj_uni_cls)
+                #document.add_paragraph().add_run().add_break()
+                #like_heading(document, "2. Примеры сформированного наименования класса ")
+                #add_object_name_with_value_uni(document, df_obj_uni_cls) 
+            #Примеры краткого и полного наименований частной записи
+            if len(df_obj_cls) > 0:
+                add_project_name(document, df_obj_cls)
+                #document.add_paragraph().add_run().add_break()
+                #like_heading(document, "2. Примеры сформированного наименования класса ")
+                #add_object_name_with_value(document, df_obj_cls)
+        #if row.SNAME:
+        #    document.add_paragraph().add_run().add_break()
+        #    like_heading(document, "3. Схема условного обозначения класса ")
+        #    add_project_template(document, row)
+        #df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
         if row.SNAME:
             document.add_page_break()
-    # Меняем в заголовке
-    #for paragraph in document.paragraphs:
-    #    if ':КЛАСС:' in paragraph.text:
-    #        paragraph.text = "Класс: " + df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
-    #text_footer = "Класс: " + df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
-    #for section in document.sections:
-    #    footer = section.footer
-    #    if ':КЛАСС:' in footer.tables[0].cell(0, 0).text:
-    #        footer.tables[0].cell(0, 0).text = footer.tables[0].cell(0, 0).text.replace(":КЛАСС:", text_footer)
-    #        footer.tables[0].cell(0, 0).paragraphs[0].alignment = 1
+     #Меняем в заголовке
+    for paragraph in document.paragraphs:
+        if ':КЛАСС:' in paragraph.text:
+            paragraph.text = "Класс: " + df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
+    text_footer = "Класс: " + df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
+    for section in document.sections:
+        footer = section.footer
+        if ':КЛАСС:' in footer.tables[0].cell(0, 0).text:
+            footer.tables[0].cell(0, 0).text = footer.tables[0].cell(0, 0).text.replace(":КЛАСС:", text_footer)
+            footer.tables[0].cell(0, 0).paragraphs[0].alignment = 1
     path_file = (
         settings.BASE_DIR +
         "/upload/Metodika_" +
@@ -1395,10 +1418,11 @@ def add_table_of_ums(document, row):
     """
     Добавление таблицы с единицей измерения
     """
-    document.add_paragraph(
-        "Базовая единица измерения",
+    p = document.add_paragraph(
         style="List Bullet"
     )
+    run = p.add_run("Единица измерения")
+    run.bold = True
     table_umscls = document.add_table(rows=2, cols=2)
     table_umscls.style = 'Table Grid'
     table_umscls.autofit = True
@@ -1418,57 +1442,104 @@ def add_project_template(document, row):
     """
     Добавляем в документ проектные шаблоны наименований
     """
-    document.add_paragraph(
-        "Шаблон краткого наименования",
+    p = document.add_paragraph(
         style="List Bullet"
     )
+    run = p.add_run("Шаблон краткого наименования частной записи НМЦ")
+    run.bold = True
     document.add_paragraph(
         row.SNAME
     )
-    document.add_paragraph(
-        "Шаблон полного наименования",
+    p = document.add_paragraph(
         style="List Bullet"
     )
+    run = p.add_run("Шаблон полного наименования частной записи НМЦ")
+    run.bold = True
     document.add_paragraph(
         row.FNAME
     )
 
+def add_project_template_uni(document, row):
+    """
+    Добавляем в документ проектные шаблоны наименований
+    """
+    p = document.add_paragraph(
+        style="List Bullet"
+    )
+    run = p.add_run("Шаблон краткого наименования универсальной записи НМЦ")
+    run.bold = True
+    document.add_paragraph(
+        row.SNAME_UNI
+    )
+    p = document.add_paragraph(
+        style="List Bullet"
+    )
+    run = p.add_run("Шаблон полного наименования универсальной записи НМЦ")
+    run.bold = True
+    document.add_paragraph(
+        row.FNAME_UNI
+    )
 
-def add_project_name(document, df_obj_cls):
+def add_project_name_uni(document, df_obj_uni_cls):
     """
     Добавляем проектные наименования и ЕИ
     """
-    df_obj_cls = df_obj_cls.sort_values(by="SNAME")
-    document.add_paragraph(
-        "Примеры наименований",
+    df_obj_uni_cls = df_obj_uni_cls.sort_values(by="SNAME_UNI")
+    p = document.add_paragraph(
         style="List Bullet"
     )
-    rows = len(df_obj_cls)
-    table_obj = document.add_table(rows=rows + 1, cols=3)
+    run = p.add_run("Пример наименований универсальной записи НМЦ")
+    run.bold = True
+    rows = len(df_obj_uni_cls)
+    table_obj = document.add_table(rows=rows + 1, cols=2)
     table_obj.style = 'Table Grid'
     table_obj.autofit = False
     # Шапка для таблицы объектов эталона
     cell = table_obj.cell(0, 0)
+    cell.width = Inches(3.5)
     cell.text = "Краткое наименование"
     set_color_cell_header(cell, "Normal")
     cell = table_obj.cell(0, 1)
     cell.width = Inches(3.5)
     cell.text = "Полное наименование"
     set_color_cell_header(cell, "Normal")
-    cell = table_obj.cell(0, 2)
-    cell.width = Inches(0.5)
-    #cell.text = "ЕИ"
-    #set_color_cell_header(cell, "Normal")
+    i = 1
+    for obj in df_obj_uni_cls.itertuples():
+        cell = table_obj.cell(i, 0)
+        cell.text = obj.SNAME_UNI
+        cell = table_obj.cell(i, 1)
+        cell.text = obj.FNAME_UNI
+        i += 1
+
+def add_project_name(document, df_obj_cls):
+    """
+    Добавляем проектные наименования и ЕИ
+    """
+    df_obj_cls = df_obj_cls.sort_values(by="SNAME")
+    p = document.add_paragraph(
+        style="List Bullet"
+    )
+    run = p.add_run("Пример наименований частной записи НМЦ")
+    run.bold = True
+    rows = len(df_obj_cls)
+    table_obj = document.add_table(rows=rows + 1, cols=2)
+    table_obj.style = 'Table Grid'
+    table_obj.autofit = False
+    # Шапка для таблицы объектов эталона
+    cell = table_obj.cell(0, 0)
+    cell.width = Inches(3.5)
+    cell.text = "Краткое наименование"
+    set_color_cell_header(cell, "Normal")
+    cell = table_obj.cell(0, 1)
+    cell.width = Inches(3.5)
+    cell.text = "Полное наименование"
+    set_color_cell_header(cell, "Normal")
     i = 1
     for obj in df_obj_cls.itertuples():
         cell = table_obj.cell(i, 0)
         cell.text = obj.SNAME
         cell = table_obj.cell(i, 1)
         cell.text = obj.FNAME
-        #cell = table_obj.cell(i, 2)
-        #cell.width = Inches(0.5)
-        if obj.UMS_CODE:
-            cell.text = obj.UMS_CODE
         i += 1
 
 
@@ -1480,13 +1551,14 @@ def add_object_value(document, df_vsn_cls):
     document.add_paragraph().add_run().add_break()
     values = len(df_vsn_cls)
     p = document.add_paragraph(
-        "Список значений характеристик класса НМЦ",
         style="List Bullet"
     )
-    run = p.add_run()
+    
+    run = p.add_run("Список значений характеристик класса НМЦ")
     run.font.name = 'Calibri'
     run.font.size = Pt(12)
-    run.underline = True
+    #run.underline = True
+    run.bold = True
     # Значения признаков
     table_vsn = document.add_table(rows=values + 1, cols=3)
     table_vsn.style = 'Table Grid'
@@ -1496,10 +1568,10 @@ def add_object_value(document, df_vsn_cls):
     cell.text = "Наименование характеристики"
     set_color_cell_header(cell, "Normal")
     cell = table_vsn.cell(0, 1)
-    cell.text = "Значение"
+    cell.text = "Тип признака"
     set_color_cell_header(cell, "Normal")
     cell = table_vsn.cell(0, 2)
-    cell.text = "Расшифровка"
+    cell.text = "Описание признака"
     set_color_cell_header(cell, "Normal")
     j = 1
     k = 1
@@ -1531,13 +1603,15 @@ def add_dvs_type_and_name(document, df_attribute_cls):
     Добавляем в документ Наименования и тип ОД
     """
     p = document.add_paragraph(
-        "Перечень характеристик класса системы классификации НМЦ",
         style="List Bullet"
     )
-    run = p.add_run()
+    run = p.add_run(
+        "Перечень характеристик класса системы классификации НМЦ"
+    )
     run.font.name = 'Calibri'
     run.font.size = Pt(12)
-    run.underline = True
+    #run.underline = True
+    run.bold = True
     rows = len(df_attribute_cls)
     table = document.add_table(rows=rows + 1, cols=2)
     table.style = 'Table Grid'
@@ -1557,7 +1631,167 @@ def add_dvs_type_and_name(document, df_attribute_cls):
         cell.text = attr.VALTYPE
         cnt += 1
 
+def add_dop_values(document, df_dop_type_cls):
+    """
+    Добавляем в документ Наименования и тип ОД
+    """
+
+    df_dop_type = df_dop_type_cls[["NAME_AT", "TIP"]].drop_duplicates()    
+    p = document.add_paragraph(
+        style="List Bullet"
+    )
+    run = p.add_run("Перечень дополнительных атрибутов класса системы классификации НМЦ")
+    run.font.name = 'Calibri'
+    run.font.size = Pt(12)
+    #run.underline = True
+    run.bold = True
+    rows = len(df_dop_type_cls)
+    table = document.add_table(rows=len(df_dop_type) + 1, cols=2)
+    table.style = 'Table Grid'
+    table.autofit = True
+    # Шапка для таблицы признаков
+    cell = table.cell(0, 0)
+    cell.text = "Наименование атрибута"
+    set_color_cell_header(cell, "Normal")
+    cell = table.cell(0, 1)
+    cell.text = "Тип атрибута"
+    set_color_cell_header(cell, "Normal")
+    cnt = 1
+    for attr in df_dop_type.itertuples():
+        cell = table.cell(cnt, 0)
+        cell.text = attr.NAME_AT
+        cell = table.cell(cnt, 1)
+        cell.text = attr.TIP
+        cnt += 1
+        
 def add_dop_type_and_name(document, df_dop_attribute_cls):
+    """
+    Добавляем в документ Наименования и тип ОД
+    """
+    p = document.add_paragraph(
+        style="List Bullet"
+    )
+    run = p.add_run("Список значений дополнительных атрибутов класса НМЦ")
+    run.bold = True
+    run.font.name = 'Calibri'
+    run.font.size = Pt(12)
+    #run.underline = True
+    rows = len(df_dop_attribute_cls)
+    table = document.add_table(rows=rows + 1, cols=2)
+    table.style = 'Table Grid'
+    table.autofit = True
+    # Шапка для таблицы признаков
+    cell = table.cell(0, 0)
+    cell.text = "Наименование атрибута"
+    set_color_cell_header(cell, "Normal")
+    cell = table.cell(0, 1)
+    cell.text = "Допустимое значение"
+    set_color_cell_header(cell, "Normal")
+    cnt = 1
+    j = 1
+    k = 1
+    start_union = 1
+    union_name = "Наименование признака"
+    for attr in df_dop_attribute_cls.itertuples():
+        cell = table.cell(cnt, 0)
+        cell.text = attr.NAME_AT
+        cell = table.cell(cnt, 1)
+        cell.text = attr.ZNACH_AT
+        cnt += 1
+        # объединяем ячейки
+        if union_name != attr.NAME_AT:
+            union_name = attr.NAME_AT
+            start_union = j
+            k = 1
+        else:
+            a = table.cell(start_union, 0)
+            b = table.cell(start_union + k, 0)
+            A = a.merge(b)
+            A.text = union_name
+            k += 1
+        j += 1
+
+def add_object_name_with_value(document, df_obj_cls):
+    """
+    Добавляем проектные наименования и ЕИ
+    """
+    df_obj_cls = df_obj_cls.sort_values(by="SNAME")
+    df_obj = df_obj_cls[["OBJ_ID", "SNAME", "FNAME"]].drop_duplicates()    
+    for obj in df_obj.itertuples():
+        document.add_paragraph(
+            "Пример краткого наименования частной записи НМЦ",
+            style="List Bullet"
+        )
+        paragr = document.add_paragraph()
+        run = paragr.add_run(obj.SNAME)
+        #полужирный шрифт
+        #run.bold = True 
+        #курсив
+        #run.italic = True 
+        #df_obj_vsn = df_obj_cls.loc[df_obj_cls["OBJ_ID"] == obj.OBJ_ID].sort_values(by="ORD")
+        #for vsn in df_obj_vsn.itertuples():
+        #    value = "" if vsn.VAL is None else vsn.VAL
+        #    document.add_paragraph(
+        #        "[" + vsn.NAME + "] - " + value
+        #)
+
+        document.add_paragraph(
+            "Пример полного наименования частной записи НМЦ",
+            style="List Bullet"
+        )
+        paragr = document.add_paragraph()
+        run = paragr.add_run(obj.FNAME)
+        #полужирный шрифт
+        #run.bold = True 
+        #курсив
+        #run.italic = True 
+        #for vsn in df_obj_vsn.itertuples():
+        #    value = "" if vsn.SVAL is None else vsn.SVAL
+        #    document.add_paragraph(                
+        #       "[" + vsn.NAME + "] - " + value
+        #    )
+
+def add_object_name_with_value_uni(document, df_obj_uni_cls):
+    """
+    Добавляем проектные наименования и ЕИ
+    """
+    df_obj_uni_cls = df_obj_uni_cls.sort_values(by="SNAME_UNI")
+    df_obj_uni = df_obj_uni_cls[["OBJ_ID", "SNAME_UNI", "FNAME_UNI"]].drop_duplicates()    
+    for obj in df_obj_uni.itertuples():
+        document.add_paragraph(
+            "Пример краткого наименования универсальной записи НМЦ",
+            style="List Bullet"
+        )
+        paragr = document.add_paragraph()
+        run = paragr.add_run(obj.SNAME_UNI)
+        #полужирный шрифт
+        #run.bold = True 
+        #курсив
+        #run.italic = True 
+        #df_obj_vsn = df_obj_cls.loc[df_obj_cls["OBJ_ID"] == obj.OBJ_ID].sort_values(by="ORD")
+        #for vsn in df_obj_vsn.itertuples():
+        #    value = "" if vsn.VAL is None else vsn.VAL
+        #    document.add_paragraph(
+        #        "[" + vsn.NAME + "] - " + value
+        #)
+
+        document.add_paragraph(
+            "Пример полного наименования универсальной записи НМЦ",
+            style="List Bullet"
+        )
+        paragr = document.add_paragraph()
+        run = paragr.add_run(obj.FNAME_UNI)
+        #полужирный шрифт
+        #run.bold = True 
+        #курсив
+        #run.italic = True 
+        #for vsn in df_obj_vsn.itertuples():
+        #    value = "" if vsn.SVAL is None else vsn.SVAL
+        #    document.add_paragraph(                
+        #       "[" + vsn.NAME + "] - " + value
+        #    )
+
+def add_dop_object_value(document, df_dop_attribute_cls):
     """
     Добавляем в документ Наименования и тип ОД
     """
@@ -1568,7 +1802,7 @@ def add_dop_type_and_name(document, df_dop_attribute_cls):
     run = p.add_run()
     run.font.name = 'Calibri'
     run.font.size = Pt(12)
-    run.underline = True
+    #run.underline = True
     rows = len(df_dop_attribute_cls)
     table = document.add_table(rows=rows + 1, cols=2)
     table.style = 'Table Grid'
@@ -1581,45 +1815,25 @@ def add_dop_type_and_name(document, df_dop_attribute_cls):
     cell.text = "Тип характеристики"
     set_color_cell_header(cell, "Normal")
     cnt = 1
+    j = 1
+    k = 1
+    start_union = 1
+    union_name = "Наименование признака"
     for attr in df_dop_attribute_cls.itertuples():
         cell = table.cell(cnt, 0)
-        cell.text = attr.name_at
+        cell.text = attr.NAME_AT
         cell = table.cell(cnt, 1)
-        cell.text = attr.znach_at
+        cell.text = attr.ZNACH_AT
         cnt += 1
-
-
-def add_object_name_with_value(document, df_obj_cls):
-    """
-    Добавляем проектные наименования и ЕИ
-    """
-    df_obj_cls = df_obj_cls.sort_values(by="SNAME")
-    df_obj = df_obj_cls[["OBJ_ID", "SNAME", "FNAME"]].drop_duplicates()    
-    for obj in df_obj.itertuples():
-        document.add_paragraph(
-            "  3.1 Краткое наименование"
-        )
-        paragr = document.add_paragraph()
-        run = paragr.add_run(obj.SNAME)
-        run.bold = True
-        run.italic = True
-        #df_obj_vsn = df_obj_cls.loc[df_obj_cls["OBJ_ID"] == obj.OBJ_ID].sort_values(by="ORD")
-        #for vsn in df_obj_vsn.itertuples():
-        #    value = "" if vsn.VAL is None else vsn.VAL
-        #    document.add_paragraph(
-        #        "[" + vsn.NAME + "] - " + value
-        #)
-
-        document.add_paragraph(
-            "  3.2 Полное наименование"
-        )
-        paragr = document.add_paragraph()
-        run = paragr.add_run(obj.FNAME)
-        run.bold = True
-        run.italic = True
-        #for vsn in df_obj_vsn.itertuples():
-        #    value = "" if vsn.SVAL is None else vsn.SVAL
-        #    document.add_paragraph(                
-        #       "[" + vsn.NAME + "] - " + value
-        #    )
-
+        # объединяем ячейки
+        if union_name != attr.NAME_AT:
+            union_name = attr.NAME_AT
+            start_union = j
+            k = 1
+        else:
+            a = table.cell(start_union, 0)
+            b = table.cell(start_union + k, 0)
+            A = a.merge(b)
+            A.text = union_name
+            k += 1
+        j += 1
