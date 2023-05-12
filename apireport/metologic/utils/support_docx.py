@@ -1322,14 +1322,14 @@ def create_docx71(data_js):
             document.add_paragraph().add_run().add_break()
             # Тип атрибута
             df_dop_type_cls = df_dop.loc[df_dop["CLS_ID"] == row.CLS_ID]
-            add_dop_values(document, df_dop_type_cls)
+            add_dop_values(document, df_dop_type_cls, row)
             document.add_paragraph().add_run().add_break()
             # Значения атрибутов
             df_dop_attribute_cls = df_dop.loc[df_dop["CLS_ID"] == row.CLS_ID]
-            add_dop_type_and_name(document, df_dop_attribute_cls)
-            document.add_paragraph().add_run().add_break()
-            if row.UMS_CODE:
-                add_table_of_ums(document, row)
+            add_dop_type_and_name(document, df_dop_attribute_cls, row)
+            # document.add_paragraph().add_run().add_break()
+            # if row.UMS_CODE:
+            #     add_table_of_ums(document, row)
             # df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
             #Шаблоны универсальной записи
             if row.SNAME:
@@ -1568,10 +1568,10 @@ def add_object_value(document, df_vsn_cls):
     cell.text = "Наименование характеристики"
     set_color_cell_header(cell, "Normal")
     cell = table_vsn.cell(0, 1)
-    cell.text = "Тип признака"
+    cell.text = "Краткое значение"
     set_color_cell_header(cell, "Normal")
     cell = table_vsn.cell(0, 2)
-    cell.text = "Описание признака"
+    cell.text = "Полное значение"
     set_color_cell_header(cell, "Normal")
     j = 1
     k = 1
@@ -1610,10 +1610,9 @@ def add_dvs_type_and_name(document, df_attribute_cls):
     )
     run.font.name = 'Calibri'
     run.font.size = Pt(12)
-    #run.underline = True
     run.bold = True
     rows = len(df_attribute_cls)
-    table = document.add_table(rows=rows + 1, cols=2)
+    table = document.add_table(rows=rows + 1, cols=3)
     table.style = 'Table Grid'
     table.autofit = True
     # Шапка для таблицы признаков
@@ -1621,7 +1620,10 @@ def add_dvs_type_and_name(document, df_attribute_cls):
     cell.text = "Наименование характеристики"
     set_color_cell_header(cell, "Normal")
     cell = table.cell(0, 1)
-    cell.text = "Тип характеристики"
+    cell.text = "Тип признака"
+    set_color_cell_header(cell, "Normal")
+    cell = table.cell(0, 2)
+    cell.text = "Признак УЗМ"
     set_color_cell_header(cell, "Normal")
     cnt = 1
     for attr in df_attribute_cls.itertuples():
@@ -1629,9 +1631,12 @@ def add_dvs_type_and_name(document, df_attribute_cls):
         cell.text = attr.NAME
         cell = table.cell(cnt, 1)
         cell.text = attr.VALTYPE
+        cell = table.cell(cnt, 2)
+        cell.text = 'X' if attr.UNIVERSAL == 1 else ''
         cnt += 1
 
-def add_dop_values(document, df_dop_type_cls):
+
+def add_dop_values(document, df_dop_type_cls, row):
     """
     Добавляем в документ Наименования и тип ОД
     """
@@ -1646,7 +1651,7 @@ def add_dop_values(document, df_dop_type_cls):
     #run.underline = True
     run.bold = True
     rows = len(df_dop_type_cls)
-    table = document.add_table(rows=len(df_dop_type) + 1, cols=2)
+    table = document.add_table(rows=len(df_dop_type) + 2, cols=2)
     table.style = 'Table Grid'
     table.autofit = True
     # Шапка для таблицы признаков
@@ -1663,8 +1668,12 @@ def add_dop_values(document, df_dop_type_cls):
         cell = table.cell(cnt, 1)
         cell.text = attr.TIP
         cnt += 1
+    cell = table.cell(cnt, 0)
+    cell.text = "ЕИ"
+    cell = table.cell(cnt, 1)
+    cell.text = "Текстовый"
         
-def add_dop_type_and_name(document, df_dop_attribute_cls):
+def add_dop_type_and_name(document, df_dop_attribute_cls, row):
     """
     Добавляем в документ Наименования и тип ОД
     """
@@ -1677,7 +1686,7 @@ def add_dop_type_and_name(document, df_dop_attribute_cls):
     run.font.size = Pt(12)
     #run.underline = True
     rows = len(df_dop_attribute_cls)
-    table = document.add_table(rows=rows + 1, cols=2)
+    table = document.add_table(rows=rows + 2, cols=2)
     table.style = 'Table Grid'
     table.autofit = True
     # Шапка для таблицы признаков
@@ -1710,6 +1719,10 @@ def add_dop_type_and_name(document, df_dop_attribute_cls):
             A.text = union_name
             k += 1
         j += 1
+    cell = table.cell(cnt, 0)
+    cell.text = "ЕИ"
+    cell = table.cell(cnt, 1)
+    cell.text = row.UMS_NAME
 
 def add_object_name_with_value(document, df_obj_cls):
     """

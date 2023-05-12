@@ -46,7 +46,8 @@ nclv as
 	                      bcls.cls_id,
 	                      nmpp.fname,
 	                      1) fname,
-                          nmpp.name nfname
+       nmpp.fname nfname,
+       nmpp.name check_name
 from bcls, nmpp
 where bcls.mlt_id = nmpp.mlt_id 
   and bcls.clf_id = nmpp.clf_id
@@ -68,8 +69,9 @@ select distinct
        sdv.ord,
        case when sgn.valtype = 1 then ums.code else null end ums_code,
        case when sgn.valtype = 0 then 'Текстовый' 
-			else 'Числовой' end valtype,
-	  547 cst_id
+			 else 'Числовой' end valtype,
+	     547 cst_id,
+       case when regexp_like(b.check_name,'{([^[{]*)\[&?'||sdv.dvs_id|| '\]') then 1 else 0 end universal
 from nclv b, sdv, sgn, ums 
 where b.mlt_id = sdv.mlt_id 
   and b.clf_id = sdv.clf_id 
