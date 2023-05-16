@@ -108,13 +108,14 @@ zvsn as (select distinct zdvs.mlt_id,
           and vds.sgn_id = vso.sgn_id
           and vds.dvs_id = vso.dvs_id
           and vds.vsn_id = vso.vsn_id
+          and vds.vsn_id <> 17703974
           and zdvs.clf_id = :inclf_id
-          and exists (select 1 
+          and (exists (select 1 
                       from obj
                       where obj.mlt_id = vso.mlt_id
                         and obj.obj_id = vso.obj_id
                         and obj.status = 1
-                        and obj.prj_id = :prj_id)
+                        and obj.prj_id = :prj_id) or (vso.sgn_id = 886736 and vds.vsn_id not in (0, 17703664)))
        UNION ALL 
        select distinct zdvs.mlt_id,
                          zdvs.clf_id_pp,
@@ -139,18 +140,42 @@ zvsn as (select distinct zdvs.mlt_id,
           and vds.sgn_id = vso.sgn_id
           and vds.dvs_id = vso.dvs_id
           and vds.vsn_id = vso.vsn_id
+          and vds.vsn_id <> 17703974
           and zdvs.clf_id = :clf_id
           and not exists (select 1 
                           from ocl 
                           where vso.mlt_id = ocl.mlt_id
                             and ocl.clf_id = :inclf_id
                             and vso.obj_id = ocl.obj_id)
-          and exists (select 1 
+          and (exists (select 1 
                       from obj
                       where obj.mlt_id = vso.mlt_id
                         and obj.obj_id = vso.obj_id
                         and obj.status = 1
-                        and obj.prj_id = :prj_id)),
+                        and obj.prj_id = :prj_id) or (vso.sgn_id = 886736 and vds.vsn_id in (0, 17703664)))
+          UNION ALL 
+          select distinct zdvs.mlt_id,
+                         zdvs.clf_id_pp,
+                         zdvs.cls_id_pp,
+                         zdvs.code,
+                         zdvs.name, 
+                         zdvs.clf_id,
+                         zdvs.cls_id,
+                         zdvs.dvs_id,
+                         zdvs.sgn_id,
+                         17703664,
+                         :prj_id prj_id
+          from zdvs 
+          where zdvs.mlt_id = 1
+            and zdvs.sgn_id = 886736
+            and not exists (select 1 
+                              from vds 
+                              where vds.mlt_id = zdvs.mlt_id
+                                and vds.clf_id = zdvs.clf_id
+                                and vds.cls_id = zdvs.cls_id 
+                                and vds.sgn_id = zdvs.sgn_id
+                                and vds.dvs_id = zdvs.dvs_id
+                                and vds.vsn_id = 17703664)),
 endval as
 (select zdvs.mlt_id,
        zdvs.clf_id_pp,

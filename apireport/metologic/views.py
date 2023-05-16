@@ -138,6 +138,7 @@ def ink_metodology(request):
     sendmail(request_data.get("project_args").get("email"), "subject_mail", "text_mail", path_file, str(name_file))
     return JsonResponse(result, status=status)
 
+
 def sev_metodology(request):
     '''
     Принимаем данные для формирования методологии
@@ -163,6 +164,7 @@ def get_unipro_data_excel(request):
     result["message"] = "Привет"
     sendmail(request_data.get("project_args").get("email"), "subject_mail", "text_mail", path_file, str(name_file))
     return JsonResponse(result, status=status)
+
 
 def mag_metodology(request):
     '''
