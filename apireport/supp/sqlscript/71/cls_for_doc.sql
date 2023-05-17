@@ -23,7 +23,28 @@ connect by prior clv.mlt_id = clv.mlt_id
   and prior clv.cfv_id = clv.cfv_id 
   and prior clv.clf_id = clv.clv_clf_id
   and prior clv.cls_id = clV.clv_cls_id)
-  select bcls.mlt_id,
+  
+  select a.mlt_id,
+       a.clf_id,
+       a.cls_id,
+       a.clv_clf_id,
+       a.clv_cls_id,
+       a.name,
+       a.code,
+       a.cfv_id,
+       a.prj_id,
+       a.project_name,
+       a.isleaf,
+       a.clv_lev,
+       REPLACE(a.sname_uni, '&Стандарт', 'Стандарт') sname_uni,
+       REPLACE(a.fname_uni, '&Стандарт', 'Стандарт') fname_uni,
+       REPLACE(a.name_sh, '&Стандарт', 'Стандарт') name_sh,
+       REPLACE(a.sname, '&Стандарт', 'Стандарт') sname,
+       REPLACE(a.fname, '&Стандарт', 'Стандарт') fname,
+       a.ums_code,
+       a.ums_name,
+       :prj_id prj_id
+  from (select bcls.mlt_id,
        bcls.clf_id,
        bcls.cls_id,
        bcls.clv_clf_id,
@@ -45,8 +66,7 @@ connect by prior clv.mlt_id = clv.mlt_id
        case when isleaf = 1 then  ums.code
            else null end ums_code,
        case when isleaf = 1 then  ums.name
-        else null end ums_name,
-      :prj_id prj_id
+        else null end ums_name
 from bcls, nmpp, cum, ums 
 where bcls.mlt_id = nmpp.mlt_id (+) 
   and bcls.clf_id = nmpp.clf_id (+)
@@ -56,6 +76,6 @@ where bcls.mlt_id = nmpp.mlt_id (+)
   and bcls.clf_id = cum.clf_id (+) 
   and bcls.cls_id = cum.cls_id (+)  
   and cum.cst_id (+) = 548
-  and cum.ums_id = ums.ums_id (+)
+  and cum.ums_id = ums.ums_id (+)) a
 
-order by bcls.code
+order by a.code

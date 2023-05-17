@@ -1295,26 +1295,26 @@ def add_project_name_uni(document, df_obj_uni_cls):
         style="List Bullet"
     )
     run = p.add_run("Пример наименований универсальной записи НМЦ")
-    run.bold = True
     rows = len(df_obj_uni_cls)
     table_obj = document.add_table(rows=rows + 1, cols=2)
     table_obj.style = 'Table Grid'
     table_obj.autofit = False
+    run.bold = True
     # Шапка для таблицы объектов эталона
     cell = table_obj.cell(0, 0)
     cell.width = Inches(3.5)
-    cell.text = "Краткое наименование"
+    add_header_table_style(cell,"Краткое наименование")
     set_color_cell_header(cell, "Normal")
     cell = table_obj.cell(0, 1)
     cell.width = Inches(3.5)
-    cell.text = "Полное наименование"
+    add_header_table_style(cell, "Полное наименование")
     set_color_cell_header(cell, "Normal")
     i = 1
     for obj in df_obj_uni_cls.itertuples():
         cell = table_obj.cell(i, 0)
-        cell.text = obj.SNAME_UNI
+        add_cell_table_style(cell, obj.SNAME_UNI)
         cell = table_obj.cell(i, 1)
-        cell.text = obj.FNAME_UNI
+        add_cell_table_style(cell, obj.FNAME_UNI)
         i += 1
 
 
@@ -1335,18 +1335,18 @@ def add_project_name(document, df_obj_cls):
     # Шапка для таблицы объектов эталона
     cell = table_obj.cell(0, 0)
     cell.width = Inches(3.5)
-    cell.text = "Краткое наименование"
+    add_header_table_style(cell, "Краткое наименование")
     set_color_cell_header(cell, "Normal")
     cell = table_obj.cell(0, 1)
     cell.width = Inches(3.5)
-    cell.text = "Полное наименование"
+    add_header_table_style(cell, "Полное наименование")
     set_color_cell_header(cell, "Normal")
     i = 1
     for obj in df_obj_cls.itertuples():
         cell = table_obj.cell(i, 0)
-        cell.text = obj.SNAME
+        add_cell_table_style(cell, obj.SNAME)
         cell = table_obj.cell(i, 1)
-        cell.text = obj.FNAME
+        add_cell_table_style(cell, obj.FNAME)
         i += 1
 
 
@@ -1389,6 +1389,7 @@ def add_header_table_style(cell, title):
     run = p.add_run(title)
     run.font.name = 'Arial'
     run.font.size = Pt(10)
+    run.bold = True
     set_color_cell_header(cell, "Normal")
 
 
@@ -1418,6 +1419,12 @@ def add_paragraph_before_table(document, title):
     run.bold = True
 
 
+def delete_paragraph(paragraph):
+    p = paragraph._element
+    p.getparent().remove(p)
+    paragraph._p = paragraph._element = None
+
+
 def add_dop_values(document, df_dop_type_cls, row):
     """
     Добавляем в документ Наименования и тип ОД
@@ -1440,9 +1447,9 @@ def add_dop_values(document, df_dop_type_cls, row):
         add_cell_table_style(cell, attr.TIP)
         cnt += 1
     cell = table.cell(cnt, 0)
-    cell.text = "ЕИ"
+    add_cell_table_style(cell, "ЕИ")
     cell = table.cell(cnt, 1)
-    cell.text = "Текстовый"
+    add_cell_table_style(cell, "Текстовый")
 
 
 def add_dop_type_and_name(document, df_dop_attribute_cls, row):
@@ -1479,6 +1486,7 @@ def add_dop_type_and_name(document, df_dop_attribute_cls, row):
             a = table.cell(start_union, 0)
             b = table.cell(start_union + k, 0)
             A = a.merge(b)
+            #add_cell_table_style(A, union_name)
             A.text = union_name
             add_cell_table_style_for_merge(A, union_name)
             k += 1
