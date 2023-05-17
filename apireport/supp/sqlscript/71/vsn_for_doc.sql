@@ -16,7 +16,7 @@ WITH bcls
                  WHERE status <> 2
                  START WITH cfv_id = :cfv_id
                      AND mlt_id = :mlt_id
-                     AND clf_id in (:clf_id, :inclf_id)
+                     AND clf_id = :clf_id
                      AND cls_id = :cls_id
                  CONNECT BY PRIOR cfv_id = cfv_id
                      AND PRIOR mlt_id = mlt_id
@@ -141,7 +141,7 @@ zvsn as (select distinct zdvs.mlt_id,
           and vds.dvs_id = vso.dvs_id
           and vds.vsn_id = vso.vsn_id
           and vds.vsn_id <> 17703974
-          and zdvs.clf_id = :clf_id
+          and zdvs.clf_id = 6
           and not exists (select 1 
                           from ocl 
                           where vso.mlt_id = ocl.mlt_id
@@ -230,7 +230,7 @@ from (SELECT DISTINCT sdv.cfv_id,
                            else a.val end
                            sval,*/
                       case when vsn.valchar = (case when a.sval is null then a.val
-                           else a.sval end) then null
+                           else a.sval end) then vsn.valchar
                            else vsn.valchar end sval,
                       sdv.ord ord
 FROM bcls c, endval a, sdv, dvs, nmpp, vsn

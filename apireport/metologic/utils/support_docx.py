@@ -1471,7 +1471,7 @@ def add_dop_type_and_name(document, df_dop_attribute_cls, row):
         add_cell_table_style(cell, attr.ZNACH_AT)
         cnt += 1
         # объединяем ячейки
-        if union_name != attr.NAME_AT:
+        if (union_name != attr.NAME_AT or k == 458):
             union_name = attr.NAME_AT
             start_union = j
             k = 1
