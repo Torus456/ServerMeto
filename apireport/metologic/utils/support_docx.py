@@ -74,6 +74,7 @@ def add_object_value(document, df_vsn_cls):
             b = table_vsn.cell(start_union + k, 0)
             A = a.merge(b)
             A.text = union_name
+            add_cell_table_style_for_merge(A, union_name)
             k += 1
         j += 1
 
@@ -237,6 +238,7 @@ def create_docx_with_tepmplate(data_js):
                         b = table_vsn.cell(start_union + k, 0)
                         A = a.merge(b)
                         A.text = union_name
+                        add_cell_table_style_for_merge(A, union_name)
                         k += 1
                     j += 1
                 document.add_paragraph().add_run()
@@ -513,6 +515,7 @@ def create_docx(data_js):
                         b = table_vsn.cell(start_union + k, 0)
                         A = a.merge(b)
                         A.text = union_name
+                        add_cell_table_style_for_merge(A, union_name)
                         k += 1
                     j += 1
                 document.add_paragraph().add_run().add_break()
@@ -1016,6 +1019,7 @@ def create_docx66(data_js):
                         b = table_vsn.cell(start_union + k, 0)
                         A = a.merge(b)
                         A.text = union_name
+                        add_cell_table_style_for_merge(A, union_name)
                         k += 1
                     j += 1
                 document.add_paragraph().add_run().add_break()
@@ -1399,14 +1403,12 @@ def add_cell_table_style(cell, title):
     run.font.size = Pt(11)
 
 
-def add_cell_table_style_for_marge_cell(cell, title):
+def add_cell_table_style_for_merge(cell, title):
     """
     Формируем заголовок для таблицы в едином стиле
     """
-    p = cell.paragraphs[0]
-    run = p.add_run(title)
-    run.font.name = 'Times New Roman'
-    run.font.size = Pt(11)
+    cell.paragraphs[0].runs[0].font.name = 'Times New Roman'
+    cell.paragraphs[0].runs[0].font.size = Pt(11)
 
 
 def add_paragraph_before_table(document, title):
@@ -1486,6 +1488,7 @@ def add_dop_type_and_name(document, df_dop_attribute_cls, row):
             A = a.merge(b)
             #add_cell_table_style(A, union_name)
             A.text = union_name
+            add_cell_table_style_for_merge(A, union_name)
             k += 1
         j += 1
     cell = table.cell(cnt, 0)
@@ -1571,5 +1574,6 @@ def add_dop_object_value(document, df_dop_attribute_cls):
             b = table.cell(start_union + k, 0)
             A = a.merge(b)
             A.text = union_name
+            add_cell_table_style_for_merge(A, union_name)
             k += 1
         j += 1
