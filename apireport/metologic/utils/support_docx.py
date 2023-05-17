@@ -1385,10 +1385,21 @@ def add_header_table_style(cell, title):
     run = p.add_run(title)
     run.font.name = 'Arial'
     run.font.size = Pt(10)
+    run.bold = True
     set_color_cell_header(cell, "Normal")
 
 
 def add_cell_table_style(cell, title):
+    """
+    Формируем заголовок для таблицы в едином стиле
+    """
+    p = cell.paragraphs[0]
+    run = p.add_run(title)
+    run.font.name = 'Times New Roman'
+    run.font.size = Pt(11)
+
+
+def add_cell_table_style_for_marge_cell(cell, title):
     """
     Формируем заголовок для таблицы в едином стиле
     """
@@ -1404,6 +1415,12 @@ def add_paragraph_before_table(document, title):
     run.font.name = 'Times New Roman'
     run.font.size = Pt(12)
     run.bold = True
+
+
+def delete_paragraph(paragraph):
+    p = paragraph._element
+    p.getparent().remove(p)
+    paragraph._p = paragraph._element = None
 
 
 def add_dop_values(document, df_dop_type_cls, row):
@@ -1467,6 +1484,7 @@ def add_dop_type_and_name(document, df_dop_attribute_cls, row):
             a = table.cell(start_union, 0)
             b = table.cell(start_union + k, 0)
             A = a.merge(b)
+            #add_cell_table_style(A, union_name)
             A.text = union_name
             k += 1
         j += 1
