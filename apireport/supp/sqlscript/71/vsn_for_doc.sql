@@ -205,7 +205,8 @@ select q.cfv_id,
        q.code,
        q.name_cl,
        q.val,
-       q.sval,
+       (case when q.name = 'Стандарт' then null 
+            else q.sval end) sval,
        q.ord,
        case when sgn.valtype = 1 then to_char(vsn.valnum, '99999999999d9999') 
             when regexp_like(lower(q.name), 'дюйм|градус') and regexp_like(vsn.valchar, '[0-9]*[\.,]?*[0-9]') then up_pulatov.ink_to_number(vsn.valchar)
