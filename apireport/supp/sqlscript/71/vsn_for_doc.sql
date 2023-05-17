@@ -226,13 +226,13 @@ from (SELECT DISTINCT sdv.cfv_id,
                       c.name name_cl,
                       case when a.sval is null then a.val
                            else a.sval end val,    
-                      /*case when a.val = (case when a.sval is null then a.val
+                      case when a.val = (case when a.sval is null then a.val
                            else a.sval end) then null
                            else a.val end
-                           sval,*/
-                      case when vsn.valchar = (case when a.sval is null then a.val
+                           sval,
+                      /*case when vsn.valchar = (case when a.sval is null then a.val
                            else a.sval end) then vsn.valchar
-                           else vsn.valchar end sval,
+                           else vsn.valchar end sval,*/
                       sdv.ord ord
 FROM bcls c, endval a, sdv, dvs, nmpp, vsn
 where c.mlt_id = a.mlt_id
