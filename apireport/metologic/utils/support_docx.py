@@ -1095,7 +1095,7 @@ def create_docx71(data_js):
     df_cls = fill_dataframe(sql_path, 'cls_for_doc.sql', con, project_args)
     df_dvs = fill_dataframe(sql_path, 'dvs_for_doc.sql', con, project_args)
     df_vsn = fill_dataframe(sql_path, 'vsn_for_doc.sql', con, project_args)
-    df_obj = fill_dataframe(sql_path, 'obj_for_doc.sql', con, project_args)
+    df_obj = fill_dataframe(sql_path, 'obj_for_doc.sql', con, project_args_obj)
     df_obj_uni = fill_dataframe(sql_path, 'obj_for_doc_uni.sql', con, project_args_obj)
     df_dop = fill_dataframe(sql_path, 'dop_for_doc.sql', con, project_args)
     document = docx.Document(docs_path)

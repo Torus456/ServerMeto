@@ -104,6 +104,10 @@ where xcls.mlt_id = ocl.mlt_id
   and ocl.obj_id = oclp.obj_id
   and oclp.sname not like '%?%'
   and oclp.prj_id = xcls.prj_id
+  and not exists (select 1 from vobj 
+              where obj.mlt_id = vobj.mlt_id
+                and obj.obj_id = vobj.obj_id
+                and vobj.aobj_id = :aobj_id)
 union all
 select distinct xcls.mlt_id, 
        xcls.clf_id_pp clf_id, 
@@ -132,6 +136,10 @@ where xcls.mlt_id = ocl.mlt_id
   and ocl.clf_id = oclp.clf_id
   and ocl.cls_id = oclp.cls_id
   and ocl.obj_id = oclp.obj_id
+  and not exists (select 1 from vobj 
+              where obj.mlt_id = vobj.mlt_id
+                and obj.obj_id = vobj.obj_id
+                and vobj.aobj_id = :aobj_id)
   and oclp.prj_id = xcls.prj_id
   and oclp.sname not like '%?%') a) q
 where q.num = 1
