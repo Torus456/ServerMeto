@@ -204,9 +204,14 @@ select q.cfv_id,
        q.name,
        q.code,
        q.name_cl,
-       q.val,
+       /*q.val,
        (case when q.name = 'Стандарт' then null 
-            else q.sval end) sval,
+            else q.sval end) sval,*/    
+       (case when q.name = 'Стандарт' then q.val_1
+             else q.val end) val,
+       (case when q.name = 'Стандарт' then null
+             when q.valchar <> q.val_1 then q.val_1
+             else q.sval end) sval,     
        q.ord,
        case when sgn.valtype = 1 then to_char(vsn.valnum, '99999999999d9999') 
             when regexp_like(lower(q.name), 'дюйм|градус') and regexp_like(vsn.valchar, '[0-9]*[\.,]?*[0-9]') then up_pulatov.ink_to_number(vsn.valchar)
@@ -224,16 +229,24 @@ from (SELECT DISTINCT sdv.cfv_id,
                       sdv.name,
                       c.code code,
                       c.name name_cl,
-                      case when a.sval is null then a.val
+                      /*case when a.sval is null then a.val
                            else a.sval end val,    
                       case when (REGEXP_LIKE (nmpp.sname || nmpp.name || nmpp.fname, '\[&' || sdv.dvs_id || '\]') or REGEXP_LIKE (nmpp.sname || nmpp.name || nmpp.fname, '\[' || sdv.dvs_id || '\]\[#'))
                            then vsn.valchar
+                           else null end
+                           sval,*/
+                      nvl(vsn.valchar, a.val) val,   
+                      case when (REGEXP_LIKE (nmpp.sname || nmpp.name || nmpp.fname, '\[&' || sdv.dvs_id || '\]') or REGEXP_LIKE (nmpp.sname || nmpp.name || nmpp.fname, '\[' || sdv.dvs_id || '\]\[#'))
+                           then a.sval
                            else null end
                            sval,
                       /*case when vsn.valchar = (case when a.sval is null then a.val
                            else a.sval end) then vsn.valchar
                            else vsn.valchar end sval,*/
-                      sdv.ord ord
+                      sdv.ord ord,
+                      a.val val_1,
+                      a.sval sval_1, 
+                      vsn.valchar
 FROM bcls c, endval a, sdv, dvs, nmpp, vsn
 where c.mlt_id = a.mlt_id
   and c.clf_id = a.clf_id_pp

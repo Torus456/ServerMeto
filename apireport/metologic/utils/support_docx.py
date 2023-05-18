@@ -10,6 +10,9 @@ from docx.shared import Pt
 from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
 from docx.enum.text import WD_LINE_SPACING
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.oxml.shared import OxmlElement,qn
 
 
 def fill_dataframe(path, query, connect, project_args, replace_to=[]):
@@ -1311,6 +1314,7 @@ def add_project_name_uni(document, df_obj_uni_cls):
     add_header_table_style(cell, "Полное наименование")
     set_color_cell_header(cell, "Normal")
     i = 1
+    set_repeat_table_header(table_obj.rows[0])
     for obj in df_obj_uni_cls.itertuples():
         cell = table_obj.cell(i, 0)
         add_cell_table_style(cell, obj.SNAME_UNI)
@@ -1343,6 +1347,7 @@ def add_project_name(document, df_obj_cls):
     add_header_table_style(cell, "Полное наименование")
     set_color_cell_header(cell, "Normal")
     i = 1
+    set_repeat_table_header(table_obj.rows[0])
     for obj in df_obj_cls.itertuples():
         cell = table_obj.cell(i, 0)
         add_cell_table_style(cell, obj.SNAME)
@@ -1371,6 +1376,7 @@ def add_dvs_type_and_name(document, df_attribute_cls):
     cell = table.cell(0, 2)
     add_header_table_style(cell, "Признак УЗМ")
     cnt = 1
+    set_repeat_table_header(table.rows[0])
     for attr in df_attribute_cls.itertuples():
         cell = table.cell(cnt, 0)
         add_cell_table_style(cell, attr.NAME)
@@ -1379,6 +1385,17 @@ def add_dvs_type_and_name(document, df_attribute_cls):
         cell = table.cell(cnt, 2)
         add_cell_table_style(cell, 'X' if attr.UNIVERSAL == 1 else '')
         cnt += 1
+
+
+def set_repeat_table_header(row):
+    """ set repeat table row on every new page
+    """
+    tr = row._tr
+    trPr = tr.get_or_add_trPr()
+    tblHeader = OxmlElement('w:tblHeader')
+    tblHeader.set(qn('w:val'), "true")
+    trPr.append(tblHeader)
+    return row
 
 
 def add_header_table_style(cell, title):
@@ -1441,6 +1458,7 @@ def add_dop_values(document, df_dop_type_cls, row):
     cell = table.cell(0, 1)
     add_header_table_style(cell, "Тип атрибута")
     cnt = 1
+    set_repeat_table_header(table.rows[0])
     for attr in df_dop_type.itertuples():
         cell = table.cell(cnt, 0)
         add_cell_table_style(cell, attr.NAME_AT)
@@ -1468,6 +1486,7 @@ def add_dop_type_and_name(document, df_dop_attribute_cls, row):
     cell = table.cell(0, 1)
     add_header_table_style(cell, "Тип атрибута")
     cnt = 1
+    set_repeat_table_header(table.rows[0])
     j = 1
     k = 1
     start_union = 1
@@ -1555,6 +1574,7 @@ def add_dop_object_value(document, df_dop_attribute_cls):
     cell = table.cell(0, 1)
     add_header_table_style(cell, "Тип характеристики")
     cnt = 1
+    set_repeat_table_header(table.rows[0])
     j = 1
     k = 1
     start_union = 1
