@@ -53,9 +53,9 @@ def add_object_value(document, df_vsn_cls):
     cell = table_vsn.cell(0, 0)
     add_header_table_style(cell, "Наименование характеристики")
     cell = table_vsn.cell(0, 1)
-    add_header_table_style(cell, "Краткое значение")
+    add_header_table_style(cell, "Значение")
     cell = table_vsn.cell(0, 2)
-    add_header_table_style(cell, "Полное значение")
+    add_header_table_style(cell, "Краткое значение")
     j = 1
     k = 1
     start_union = 1
