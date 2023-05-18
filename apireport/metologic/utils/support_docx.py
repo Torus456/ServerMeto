@@ -1124,6 +1124,7 @@ def create_docx71(data_js):
     styles['Heading 5'].font.size = Pt(13)
     styles['Heading 5'].font.color.rgb = docx.shared.RGBColor(0, 0, 0)
     styles['Heading 5'].font.italic = False
+    # стили уровней
     # добавляем параграф с оглавлением
     # add_table_of_contents(document)
     # document.add_page_break()
