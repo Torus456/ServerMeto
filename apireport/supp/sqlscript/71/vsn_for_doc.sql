@@ -226,7 +226,7 @@ from (SELECT DISTINCT sdv.cfv_id,
                       c.name name_cl,
                       case when a.sval is null then a.val
                            else a.sval end val,    
-                      case when (REGEXP_LIKE (nmpp.sname || nmpp.fname, '\[&' || sdv.dvs_id || '\]') or REGEXP_LIKE (nmpp.sname || nmpp.fname, '\[' || sdv.dvs_id || '\]\[#'))
+                      case when (REGEXP_LIKE (nmpp.sname || nmpp.name || nmpp.fname, '\[&' || sdv.dvs_id || '\]') or REGEXP_LIKE (nmpp.sname || nmpp.name || nmpp.fname, '\[' || sdv.dvs_id || '\]\[#'))
                            then vsn.valchar
                            else null end
                            sval,
