@@ -56,6 +56,7 @@ def add_object_value(document, df_vsn_cls):
     add_header_table_style(cell, "Значение")
     cell = table_vsn.cell(0, 2)
     add_header_table_style(cell, "Краткое значение")
+    set_repeat_table_header(table_vsn.rows[0])
     j = 1
     k = 1
     start_union = 1
