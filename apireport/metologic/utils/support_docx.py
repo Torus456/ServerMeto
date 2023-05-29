@@ -1303,7 +1303,7 @@ def add_project_name_uni(document, df_obj_uni_cls):
     rows = len(df_obj_uni_cls)
     table_obj = document.add_table(rows=rows + 1, cols=2)
     table_obj.style = 'Table Grid'
-    table_obj.autofit = False
+    table_obj.autofit = True
     run.bold = True
     # Шапка для таблицы объектов эталона
     cell = table_obj.cell(0, 0)
@@ -1337,7 +1337,7 @@ def add_project_name(document, df_obj_cls):
     rows = len(df_obj_cls)
     table_obj = document.add_table(rows=rows + 1, cols=2)
     table_obj.style = 'Table Grid'
-    table_obj.autofit = False
+    table_obj.autofit = True
     # Шапка для таблицы объектов эталона
     cell = table_obj.cell(0, 0)
     cell.width = Inches(3.5)
@@ -1531,13 +1531,18 @@ def add_object_name_with_value(document, df_obj_cls):
         )
         paragr = document.add_paragraph()
         paragr.add_run(obj.SNAME)
+        paragr.autofit = False
+        col = paragr.columns[0]
+        col.width=Inches(0.5)
         document.add_paragraph(
             "Пример полного наименования частной записи НМЦ",
             style="List Bullet"
         )
         paragr = document.add_paragraph()
         paragr.add_run(obj.FNAME)
-
+        paragr.autofit = False
+        col = paragr.columns[0]
+        col.width=Inches(0.5)
 
 def add_object_name_with_value_uni(document, df_obj_uni_cls):
     """
