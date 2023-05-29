@@ -1485,7 +1485,7 @@ def add_dop_type_and_name(document, df_dop_attribute_cls, row):
     cell = table.cell(0, 0)
     add_header_table_style(cell, "Наименование атрибута")
     cell = table.cell(0, 1)
-    add_header_table_style(cell, "Тип атрибута")
+    add_header_table_style(cell, "Значение атрибута")
     cnt = 1
     set_repeat_table_header(table.rows[0])
     j = 1
