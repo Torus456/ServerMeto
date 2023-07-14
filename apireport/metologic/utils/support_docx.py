@@ -32,7 +32,7 @@ def set_color_cell_header(cell, style):
     cell = cell
     cell.paragraphs[0].style = style
     cell.paragraphs[0].alignment = 1
-    cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="5b92e5"/>'.format(nsdecls('w'))))
+    cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="bcbcbc"/>'.format(nsdecls('w'))))
 
 
 def create_docx_with_tepmplate(data_js):
@@ -1301,15 +1301,8 @@ def create_docx72(data_js):
         document.add_heading(code + " - " + row.NAME, row.CLV_LEV)
         cls_text = "«" + code + " - " + row.NAME + "»"
         # document.add_paragraph().add_run().add_break()
-        if row.SNAME:
-            add_project_template(document, row)
-        df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
         # Далее заполняем данные для класса
         if row.ISLEAF == 1:
-            # Проектное sname и ЕИ
-            df_name_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
-            add_project_name(document, df_name_cls)
-            document.add_paragraph().add_run().add_break()
             # выбираем признаки для класса
             df_attribute_cls = df_dvs.loc[df_dvs["CLS_ID"] == row.CLS_ID]
             add_dvs_type_and_name(document, df_attribute_cls)
@@ -1317,9 +1310,18 @@ def create_docx72(data_js):
             df_vsn_cls = df_vsn.loc[df_vsn["CLS_ID"] == row.CLS_ID]
             add_object_value(document, df_vsn_cls)
             document.add_paragraph().add_run().add_break()
-            # Базовая ЕИ
-            if row.UMS_CODE:
-                add_table_of_ums(document, row)
+        # Шаблон
+        if row.SNAME:
+            add_project_template(document, row)
+        df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
+        # Базовая ЕИ
+        if row.UMS_CODE:
+            add_table_of_ums(document, row)
+        if row.ISLEAF == 1:
+            # Проектное sname и ЕИ
+            document.add_paragraph().add_run().add_break()
+            df_name_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
+            add_project_name(document, df_name_cls)
         if row.SNAME:
             document.add_page_break()
     # Меняем в заголовке
