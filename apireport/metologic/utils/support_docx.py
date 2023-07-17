@@ -10,6 +10,9 @@ from docx.shared import Pt
 from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
 from docx.enum.text import WD_LINE_SPACING
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.oxml.shared import OxmlElement,qn
 
 
 def fill_dataframe(path, query, connect, project_args, replace_to=[]):
@@ -50,9 +53,10 @@ def add_object_value(document, df_vsn_cls):
     cell = table_vsn.cell(0, 0)
     add_header_table_style(cell, "Наименование характеристики")
     cell = table_vsn.cell(0, 1)
-    add_header_table_style(cell, "Краткое значение")
+    add_header_table_style(cell, "Значение")
     cell = table_vsn.cell(0, 2)
-    add_header_table_style(cell, "Полное значение")
+    add_header_table_style(cell, "Краткое значение")
+    set_repeat_table_header(table_vsn.rows[0])
     j = 1
     k = 1
     start_union = 1
@@ -1106,21 +1110,21 @@ def create_docx71(data_js):
     styles = document.styles
     styles['List Bullet'].paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY
     styles['List Bullet'].paragraph_format.space_before = Pt(12)
-    styles['Heading 1'].font.name = 'Cambria'
+    styles['Heading 1'].font.name = 'Times New Roman'
     styles['Heading 1'].font.size = Pt(14)
     styles['Heading 1'].font.color.rgb = docx.shared.RGBColor(0, 0, 0)
-    styles['Heading 2'].font.name = 'Cambria'
+    styles['Heading 2'].font.name = 'Times New Roman'
     styles['Heading 2'].font.size = Pt(13)
     styles['Heading 2'].font.color.rgb = docx.shared.RGBColor(0, 0, 0)
-    styles['Heading 3'].font.name = 'Cambria'
+    styles['Heading 3'].font.name = 'Times New Roman'
     styles['Heading 3'].font.size = Pt(13)
     styles['Heading 3'].font.italic = False
     styles['Heading 3'].font.color.rgb = docx.shared.RGBColor(0, 0, 0)
-    styles['Heading 4'].font.name = 'Cambria'
+    styles['Heading 4'].font.name = 'Times New Roman'
     styles['Heading 4'].font.size = Pt(13)
     styles['Heading 4'].font.color.rgb = docx.shared.RGBColor(0, 0, 0)
     styles['Heading 4'].font.italic = False
-    styles['Heading 5'].font.name = 'Cambria'
+    styles['Heading 5'].font.name = 'Times New Roman'
     styles['Heading 5'].font.size = Pt(13)
     styles['Heading 5'].font.color.rgb = docx.shared.RGBColor(0, 0, 0)
     styles['Heading 5'].font.italic = False
@@ -1299,7 +1303,7 @@ def add_project_name_uni(document, df_obj_uni_cls):
     rows = len(df_obj_uni_cls)
     table_obj = document.add_table(rows=rows + 1, cols=2)
     table_obj.style = 'Table Grid'
-    table_obj.autofit = False
+    table_obj.autofit = True
     run.bold = True
     # Шапка для таблицы объектов эталона
     cell = table_obj.cell(0, 0)
@@ -1311,6 +1315,7 @@ def add_project_name_uni(document, df_obj_uni_cls):
     add_header_table_style(cell, "Полное наименование")
     set_color_cell_header(cell, "Normal")
     i = 1
+    set_repeat_table_header(table_obj.rows[0])
     for obj in df_obj_uni_cls.itertuples():
         cell = table_obj.cell(i, 0)
         add_cell_table_style(cell, obj.SNAME_UNI)
@@ -1332,7 +1337,7 @@ def add_project_name(document, df_obj_cls):
     rows = len(df_obj_cls)
     table_obj = document.add_table(rows=rows + 1, cols=2)
     table_obj.style = 'Table Grid'
-    table_obj.autofit = False
+    table_obj.autofit = True
     # Шапка для таблицы объектов эталона
     cell = table_obj.cell(0, 0)
     cell.width = Inches(3.5)
@@ -1343,6 +1348,7 @@ def add_project_name(document, df_obj_cls):
     add_header_table_style(cell, "Полное наименование")
     set_color_cell_header(cell, "Normal")
     i = 1
+    set_repeat_table_header(table_obj.rows[0])
     for obj in df_obj_cls.itertuples():
         cell = table_obj.cell(i, 0)
         add_cell_table_style(cell, obj.SNAME)
@@ -1371,6 +1377,7 @@ def add_dvs_type_and_name(document, df_attribute_cls):
     cell = table.cell(0, 2)
     add_header_table_style(cell, "Признак УЗМ")
     cnt = 1
+    set_repeat_table_header(table.rows[0])
     for attr in df_attribute_cls.itertuples():
         cell = table.cell(cnt, 0)
         add_cell_table_style(cell, attr.NAME)
@@ -1379,6 +1386,17 @@ def add_dvs_type_and_name(document, df_attribute_cls):
         cell = table.cell(cnt, 2)
         add_cell_table_style(cell, 'X' if attr.UNIVERSAL == 1 else '')
         cnt += 1
+
+
+def set_repeat_table_header(row):
+    """ set repeat table row on every new page
+    """
+    tr = row._tr
+    trPr = tr.get_or_add_trPr()
+    tblHeader = OxmlElement('w:tblHeader')
+    tblHeader.set(qn('w:val'), "true")
+    trPr.append(tblHeader)
+    return row
 
 
 def add_header_table_style(cell, title):
@@ -1441,6 +1459,7 @@ def add_dop_values(document, df_dop_type_cls, row):
     cell = table.cell(0, 1)
     add_header_table_style(cell, "Тип атрибута")
     cnt = 1
+    set_repeat_table_header(table.rows[0])
     for attr in df_dop_type.itertuples():
         cell = table.cell(cnt, 0)
         add_cell_table_style(cell, attr.NAME_AT)
@@ -1466,8 +1485,9 @@ def add_dop_type_and_name(document, df_dop_attribute_cls, row):
     cell = table.cell(0, 0)
     add_header_table_style(cell, "Наименование атрибута")
     cell = table.cell(0, 1)
-    add_header_table_style(cell, "Тип атрибута")
+    add_header_table_style(cell, "Значение атрибута")
     cnt = 1
+    set_repeat_table_header(table.rows[0])
     j = 1
     k = 1
     start_union = 1
@@ -1511,13 +1531,18 @@ def add_object_name_with_value(document, df_obj_cls):
         )
         paragr = document.add_paragraph()
         paragr.add_run(obj.SNAME)
+        paragr.autofit = False
+        col = paragr.columns[0]
+        col.width=Inches(0.5)
         document.add_paragraph(
             "Пример полного наименования частной записи НМЦ",
             style="List Bullet"
         )
         paragr = document.add_paragraph()
         paragr.add_run(obj.FNAME)
-
+        paragr.autofit = False
+        col = paragr.columns[0]
+        col.width=Inches(0.5)
 
 def add_object_name_with_value_uni(document, df_obj_uni_cls):
     """
@@ -1555,6 +1580,7 @@ def add_dop_object_value(document, df_dop_attribute_cls):
     cell = table.cell(0, 1)
     add_header_table_style(cell, "Тип характеристики")
     cnt = 1
+    set_repeat_table_header(table.rows[0])
     j = 1
     k = 1
     start_union = 1
