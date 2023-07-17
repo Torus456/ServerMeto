@@ -66,6 +66,7 @@ def add_object_value(document, df_vsn_cls):
         add_cell_table_style(cell, vsn.NAME)
         cell = table_vsn.cell(j, 1)
         add_cell_table_style(cell, "" if vsn.VAL is None else vsn.VAL)
+        add_simbol_for_obj_value(cell, vsn)
         cell = table_vsn.cell(j, 2)
         add_cell_table_style(cell, "" if vsn.SVAL is None else vsn.SVAL)
         # объединяем ячейки
@@ -81,6 +82,31 @@ def add_object_value(document, df_vsn_cls):
             add_cell_table_style_for_merge(A, union_name)
             k += 1
         j += 1
+
+
+def add_simbol_for_obj_value(cell, vsn_value):
+    if vsn_value.NUM:
+        print(vsn_value.NUM)
+        p = cell.paragraphs[0]
+        run = p.add_run(str(int(vsn_value.NUM)))
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(11)
+        run.font.superscript = True
+
+
+def add_description_not_need(document, df_description):
+    for vsn in df_description.itertuples():
+        p = document.add_paragraph()
+        fmt = p.paragraph_format
+        fmt.line_spacing = Pt(0)
+        fmt.space_after = Pt(0)
+        run = p.add_run(str(int(vsn.NUM)))
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(9)
+        run.font.superscript = True
+        run = p.add_run(" - " + vsn.KOMMENT)
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(9)
 
 
 def create_docx_with_tepmplate(data_js):
@@ -1146,6 +1172,8 @@ def create_docx71(data_js):
             # Значения признаков
             df_vsn_cls = df_vsn.loc[df_vsn["CLS_ID"] == row.CLS_ID]
             add_object_value(document, df_vsn_cls)
+            df_vsn_not_need = df_vsn[["NUM", "KOMMENT"]].dropna().drop_duplicates()
+            add_description_not_need(document, df_vsn_not_need)
             # Тип атрибута
             df_dop_type_cls = df_dop.loc[df_dop["CLS_ID"] == row.CLS_ID]
             add_dop_values(document, df_dop_type_cls, row)
