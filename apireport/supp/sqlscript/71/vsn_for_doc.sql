@@ -216,7 +216,9 @@ select q.cfv_id,
        case when sgn.valtype = 1 then to_char(vsn.valnum, '99999999999d9999') 
             when regexp_like(lower(q.name), 'дюйм|градус') and regexp_like(vsn.valchar, '[0-9]*[\.,]?*[0-9]') then up_pulatov.ink_to_number(vsn.valchar)
             else vsn.valchar 
-            end ord_val
+            end ord_val,
+       r.num,
+       r.kommentarij_inkon komment
 from (SELECT DISTINCT sdv.cfv_id,
                       sdv.mlt_id,
                       sdv.clf_id,
@@ -269,11 +271,19 @@ where c.mlt_id = a.mlt_id
   and a.sgn_id = vsn.sgn_id
   and a.vsn_id = vsn.vsn_id
   and nmpp.prj_id = :prj_id
-  and REGEXP_LIKE (nmpp.sname || nmpp.fname, '\[&?' || sdv.dvs_id || '\]')) q, vsn, sgn
+  and REGEXP_LIKE (nmpp.sname || nmpp.fname, '\[&?' || sdv.dvs_id || '\]')) q, vsn, sgn, (select t.*, row_number() over(partition BY code ORDER BY code, ord) num
+                                                                                            from cs_art_load.magnit_ne_trebuetsa t) r
   where q.mlt_id = vsn.mlt_id
   and q.sgn_id = vsn.sgn_id
   and q.vsn_id = vsn.vsn_id
   and sgn.mlt_id = vsn.mlt_id
   and sgn.sgn_id = vsn.sgn_id
+  and q.mlt_id = r.mlt_id (+)
+  and q.clf_id = r.clf_id (+)
+  and q.cls_id = r.cls_id (+)
+  and q.sgn_id = r.sgn_id (+)
+  and q.dvs_id = r.dvs_id (+)
+  and q.vsn_id = r.vsn_id (+)
+  
   
   order by code, ord, ord_val, val
