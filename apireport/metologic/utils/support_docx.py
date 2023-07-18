@@ -1172,7 +1172,7 @@ def create_docx71(data_js):
             # Значения признаков
             df_vsn_cls = df_vsn.loc[df_vsn["CLS_ID"] == row.CLS_ID]
             add_object_value(document, df_vsn_cls)
-            df_vsn_not_need = df_vsn[["NUM", "KOMMENT"]].dropna().drop_duplicates()
+            df_vsn_not_need = df_vsn.loc[df_vsn["CLS_ID"] == row.CLS_ID][["NUM", "KOMMENT"]].dropna().drop_duplicates()
             add_description_not_need(document, df_vsn_not_need)
             # Тип атрибута
             df_dop_type_cls = df_dop.loc[df_dop["CLS_ID"] == row.CLS_ID]
