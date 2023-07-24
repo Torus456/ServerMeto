@@ -272,7 +272,7 @@ where c.mlt_id = a.mlt_id
   and a.vsn_id = vsn.vsn_id
   and nmpp.prj_id = :prj_id
   and REGEXP_LIKE (nmpp.sname || nmpp.fname, '\[&?' || sdv.dvs_id || '\]')) q, vsn, sgn, (select t.*, row_number() over(partition BY code ORDER BY code, ord) num
-                                                                                            from cs_art_load.magnit_ne_trebuetsa t) r
+                                                                                            from cs_art_load.magnit_ne_trebuetsa_v2 t) r
   where q.mlt_id = vsn.mlt_id
   and q.sgn_id = vsn.sgn_id
   and q.vsn_id = vsn.vsn_id
