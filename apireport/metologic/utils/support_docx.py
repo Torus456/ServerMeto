@@ -109,6 +109,21 @@ def add_description_not_need(document, df_description):
     cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="bcbcbc"/>'.format(nsdecls('w'))))
 
 
+def add_description_not_need_marnit(document, df_description):
+    for vsn in df_description.itertuples():
+        p = document.add_paragraph()
+        fmt = p.paragraph_format
+        fmt.line_spacing = Pt(0)
+        fmt.space_after = Pt(0)
+        run = p.add_run(str(int(vsn.NUM)))
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(9)
+        run.font.superscript = True
+        run = p.add_run(" - " + vsn.KOMMENT)
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(9)
+
+
 def create_docx_with_tepmplate(data_js):
     """
     Собираем методику с шаблоном
@@ -1172,7 +1187,7 @@ def create_docx71(data_js):
             df_vsn_cls = df_vsn.loc[df_vsn["CLS_ID"] == row.CLS_ID]
             add_object_value(document, df_vsn_cls)
             df_vsn_not_need = df_vsn.loc[df_vsn["CLS_ID"] == row.CLS_ID][["NUM", "KOMMENT"]].dropna().drop_duplicates()
-            add_description_not_need(document, df_vsn_not_need)
+            add_description_not_need_marnit(document, df_vsn_not_need)
             # Тип атрибута
             df_dop_type_cls = df_dop.loc[df_dop["CLS_ID"] == row.CLS_ID]
             add_dop_values(document, df_dop_type_cls, row)
@@ -1510,3 +1525,180 @@ def add_dvs_type_and_name(document, df_attribute_cls):
         #cell = table.cell(cnt, 3)
         #cell.text = attr.DEPEND
         cnt += 1
+
+
+def add_dop_values(document, df_dop_type_cls, row):
+    """
+    Добавляем в документ Наименования и тип ОД
+    """
+    df_dop_type = df_dop_type_cls[["NAME_AT", "TIP"]].drop_duplicates()
+    add_paragraph_before_table(document, "Перечень дополнительных атрибутов класса системы классификации НМЦ")
+    table = document.add_table(rows=len(df_dop_type) + 2, cols=2)
+    table.style = 'Table Grid'
+    table.autofit = True
+    # Шапка для таблицы признаков
+    cell = table.cell(0, 0)
+    add_header_table_style(cell, "Наименование атрибута")
+    cell = table.cell(0, 1)
+    add_header_table_style(cell, "Тип атрибута")
+    cnt = 1
+    set_repeat_table_header(table.rows[0])
+    for attr in df_dop_type.itertuples():
+        cell = table.cell(cnt, 0)
+        add_cell_table_style(cell, attr.NAME_AT)
+        cell = table.cell(cnt, 1)
+        add_cell_table_style(cell, attr.TIP)
+        cnt += 1
+    cell = table.cell(cnt, 0)
+    add_cell_table_style(cell, "ЕИ")
+    cell = table.cell(cnt, 1)
+    add_cell_table_style(cell, "Текстовый")
+
+
+def add_dop_type_and_name(document, df_dop_attribute_cls, row):
+    """
+    Добавляем в документ Наименования и тип ОД
+    """
+    add_paragraph_before_table(document, "Список значений дополнительных атрибутов класса НМЦ")
+    rows = len(df_dop_attribute_cls)
+    table = document.add_table(rows=rows + 2, cols=2)
+    table.style = 'Table Grid'
+    table.autofit = True
+    # Шапка для таблицы признаков
+    cell = table.cell(0, 0)
+    add_header_table_style(cell, "Наименование атрибута")
+    cell = table.cell(0, 1)
+    add_header_table_style(cell, "Значение атрибута")
+    cnt = 1
+    set_repeat_table_header(table.rows[0])
+    j = 1
+    k = 1
+    start_union = 1
+    union_name = "Наименование признака"
+    for attr in df_dop_attribute_cls.itertuples():
+        cell = table.cell(cnt, 0)
+        add_cell_table_style(cell, attr.NAME_AT)
+        cell = table.cell(cnt, 1)
+        add_cell_table_style(cell, attr.ZNACH_AT)
+        cnt += 1
+        # объединяем ячейки
+        if (union_name != attr.NAME_AT or k == 458):
+            union_name = attr.NAME_AT
+            start_union = j
+            k = 1
+        else:
+            a = table.cell(start_union, 0)
+            b = table.cell(start_union + k, 0)
+            A = a.merge(b)
+            #add_cell_table_style(A, union_name)
+            A.text = union_name
+            add_cell_table_style_for_merge(A, union_name)
+            k += 1
+        j += 1
+    cell = table.cell(cnt, 0)
+    add_cell_table_style(cell, "ЕИ")
+    cell = table.cell(cnt, 1)
+    add_cell_table_style(cell, row.UMS_NAME)
+
+
+def add_project_template_uni(document, row):
+    """
+    Добавляем в документ проектные шаблоны наименований
+    """
+    p = document.add_paragraph(
+        style="List Bullet"
+    )
+    run = p.add_run("Шаблон краткого наименования универсальной записи НМЦ")
+    run.bold = True
+    document.add_paragraph(
+        row.SNAME_UNI
+    )
+    p = document.add_paragraph(
+        style="List Bullet"
+    )
+    run = p.add_run("Шаблон полного наименования универсальной записи НМЦ")
+    run.bold = True
+    document.add_paragraph(
+        row.FNAME_UNI
+    )
+
+
+def add_project_name_uni(document, df_obj_uni_cls):
+    """
+    Добавляем проектные наименования и ЕИ
+    """
+    df_obj_uni_cls = df_obj_uni_cls.sort_values(by="SNAME_UNI")
+    p = document.add_paragraph(
+        style="List Bullet"
+    )
+    run = p.add_run("Пример наименований универсальной записи НМЦ")
+    rows = len(df_obj_uni_cls)
+    table_obj = document.add_table(rows=rows + 1, cols=2)
+    table_obj.style = 'Table Grid'
+    table_obj.autofit = True
+    run.bold = True
+    # Шапка для таблицы объектов эталона
+    cell = table_obj.cell(0, 0)
+    cell.width = Inches(3.5)
+    add_header_table_style(cell,"Краткое наименование")
+    set_color_cell_header(cell, "Normal")
+    cell = table_obj.cell(0, 1)
+    cell.width = Inches(3.5)
+    add_header_table_style(cell, "Полное наименование")
+    set_color_cell_header(cell, "Normal")
+    i = 1
+    set_repeat_table_header(table_obj.rows[0])
+    for obj in df_obj_uni_cls.itertuples():
+        cell = table_obj.cell(i, 0)
+        add_cell_table_style(cell, obj.SNAME_UNI)
+        cell = table_obj.cell(i, 1)
+        add_cell_table_style(cell, obj.FNAME_UNI)
+        i += 1
+
+def add_header_table_style(cell, title):
+    """
+    Формируем заголовок для таблицы в едином стиле
+    """
+    p = cell.paragraphs[0]
+    p.alignment = 1
+    run = p.add_run(title)
+    run.font.name = 'Arial'
+    run.font.size = Pt(10)
+    run.bold = True
+    set_color_cell_header(cell, "Normal")
+
+
+def add_cell_table_style(cell, title):
+    """
+    Формируем заголовок для таблицы в едином стиле
+    """
+    p = cell.paragraphs[0]
+    run = p.add_run(title)
+    run.font.name = 'Times New Roman'
+    run.font.size = Pt(11)
+
+
+def set_repeat_table_header(row):
+    """ set repeat table row on every new page
+    """
+    tr = row._tr
+    trPr = tr.get_or_add_trPr()
+    tblHeader = OxmlElement('w:tblHeader')
+    tblHeader.set(qn('w:val'), "true")
+    trPr.append(tblHeader)
+    return row
+
+def add_cell_table_style_for_merge(cell, title):
+    """
+    Формируем заголовок для таблицы в едином стиле
+    """
+    cell.paragraphs[0].runs[0].font.name = 'Times New Roman'
+    cell.paragraphs[0].runs[0].font.size = Pt(11)
+
+
+def add_paragraph_before_table(document, title):
+    p = document.add_paragraph(style="List Bullet")
+    run = p.add_run(title)
+    run.font.name = 'Times New Roman'
+    run.font.size = Pt(12)
+    run.bold = True

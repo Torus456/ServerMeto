@@ -70,7 +70,8 @@ select q.mlt_id,
        q.name,
        q.obj_id,
        q.sname,
-       q.fname     
+       q.fname,
+       null EI    
 from (select a.mlt_id, 
        a.clf_id, 
        a.cls_id,
