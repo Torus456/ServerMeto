@@ -110,11 +110,15 @@ zvsn as (select distinct zdvs.mlt_id,
           and vds.vsn_id = vso.vsn_id
           and zdvs.clf_id = :inclf_id
           and exists (select 1 
-                      from obj
+                      from obj, vobj
                       where obj.mlt_id = vso.mlt_id
                         and obj.obj_id = vso.obj_id
                         and obj.status = 1
-                        and obj.prj_id = :prj_id)
+                        and obj.prj_id = :prj_id
+                        and vobj.mlt_id = obj.mlt_id
+                        and vobj.obj_id = obj.obj_id
+                        and vobj.aobj_id = 9266
+                        and vobj.mlt_id = 1)
        UNION ALL 
        select distinct zdvs.mlt_id,
                          zdvs.clf_id_pp,
@@ -146,11 +150,15 @@ zvsn as (select distinct zdvs.mlt_id,
                             and ocl.clf_id = :inclf_id
                             and vso.obj_id = ocl.obj_id)
           and exists (select 1 
-                      from obj
+                      from obj, vobj
                       where obj.mlt_id = vso.mlt_id
                         and obj.obj_id = vso.obj_id
                         and obj.status = 1
-                        and obj.prj_id = :prj_id)),
+                        and obj.prj_id = :prj_id
+                        and vobj.mlt_id = obj.mlt_id
+                        and vobj.obj_id = obj.obj_id
+                        and vobj.aobj_id = 9266
+                        and vobj.mlt_id = 1)),
 endval as
 (select zdvs.mlt_id,
        zdvs.clf_id_pp,
@@ -163,10 +171,9 @@ endval as
        zdvs.sgn_id,
        zdvs.vsn_id,
        prj_id,
-       SP_ACCEPTOR.return_values(zdvs.mlt_id, zdvs.clf_id, zdvs.cls_id, zdvs.prj_id, zdvs.dvs_id, zdvs.sgn_id, zdvs.vsn_id,1) sval,
-       SP_ACCEPTOR.return_values(zdvs.mlt_id, zdvs.clf_id, zdvs.cls_id, zdvs.prj_id, zdvs.dvs_id, zdvs.sgn_id, zdvs.vsn_id,0) val
+       case when SP_ACCEPTOR.return_values(zdvs.mlt_id, zdvs.clf_id, zdvs.cls_id, zdvs.prj_id, zdvs.dvs_id, zdvs.sgn_id, zdvs.vsn_id,1) = '<Не требуется>' or SP_ACCEPTOR.return_values(zdvs.mlt_id, zdvs.clf_id, zdvs.cls_id, zdvs.prj_id, zdvs.dvs_id, zdvs.sgn_id, zdvs.vsn_id,1) = '<Отсутствует>' then 'Не требуется' else SP_ACCEPTOR.return_values(zdvs.mlt_id, zdvs.clf_id, zdvs.cls_id, zdvs.prj_id, zdvs.dvs_id, zdvs.sgn_id, zdvs.vsn_id,1) end sval,
+       case when SP_ACCEPTOR.return_values(zdvs.mlt_id, zdvs.clf_id, zdvs.cls_id, zdvs.prj_id, zdvs.dvs_id, zdvs.sgn_id, zdvs.vsn_id,0) = '<Не требуется>' or SP_ACCEPTOR.return_values(zdvs.mlt_id, zdvs.clf_id, zdvs.cls_id, zdvs.prj_id, zdvs.dvs_id, zdvs.sgn_id, zdvs.vsn_id,0) = '<Отсутствует>' then 'Не требуется' else SP_ACCEPTOR.return_values(zdvs.mlt_id, zdvs.clf_id, zdvs.cls_id, zdvs.prj_id, zdvs.dvs_id, zdvs.sgn_id, zdvs.vsn_id,0) end val
 from  zvsn zdvs)
-
 SELECT DISTINCT sdv.cfv_id,
                       sdv.mlt_id,
                       sdv.clf_id,
@@ -179,7 +186,14 @@ SELECT DISTINCT sdv.cfv_id,
                       sdv.name,
                       c.code code,
                       c.name name_cl,
-                      a.val val,    
+                      case when (select cls_id
+                        from nmpp n
+                        where n.mlt_id = 1
+                        and n.prj_id = 72
+                        and c.cls_id = n.cls_id
+                        and c.clf_id = n.clf_id
+                        and (n.name is not null or n.fname is not null)) is not null and a.sval is not null then a.sval 
+                        when c.cls_id = 190049 and a.val = '1300' then '130' else a.val end val,    
                       a.sval sval,
                       sdv.ord ord
 FROM bcls c, endval a, sdv, dvs, nmpp, vsn

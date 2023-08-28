@@ -62,24 +62,14 @@ as (select   b.mlt_id,
      where       b.mlt_id = z.mlt_id(+)
              and b.clf_id = z.root_clf(+)
              and b.cls_id = z.root_cls(+))
-
-select q.mlt_id, 
-       q.clf_id, 
-       q.cls_id,
-       q.code,
-       q.name,
-       q.obj_id,
-       q.sname,
-       q.EI  
-from (select a.mlt_id, 
+select a.mlt_id, 
        a.clf_id, 
        a.cls_id,
        a.code,
        a.name,
        a.obj_id,
        a.sname,
-       a.EI,
-       row_number() over(partition BY a.code ORDER BY a.code, a.obj_id) num            
+       a.EI          
 from (select distinct xcls.mlt_id, 
        xcls.clf_id_pp clf_id, 
        xcls.cls_id_pp cls_id,
@@ -175,7 +165,9 @@ where xcls.mlt_id = ocl.mlt_id
   and ocl.cls_id = oclp.cls_id
   and ocl.obj_id = oclp.obj_id
   and oclp.prj_id = xcls.prj_id
-  and oclp.sname not like '%?%') a) q
-where q.num = 1
-  
+  and oclp.sname not like '%?%') a, vobj
+where a.obj_id = vobj.obj_id
+and a.mlt_id = vobj.mlt_id
+and vobj.aobj_id = 9266
+and vobj.mlt_id = 1
 order by code, sname

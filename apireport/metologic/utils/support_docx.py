@@ -1327,13 +1327,14 @@ def create_docx72(data_js):
     # Меняем в заголовке
     for paragraph in document.paragraphs:
         if ':КЛАСС:' in paragraph.text:
-            paragraph.text = "Класс: " + df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
-    text_footer = "Класс: " + df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0]
+            paragraph.text = '«' + df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0] + '»'
+    text_footer = '«' + df_cls["CODE"].iloc[0] + ' - ' + df_cls["NAME"].iloc[0] + '»'
     for section in document.sections:
         footer = section.footer
         if ':КЛАСС:' in footer.tables[0].cell(0, 0).text:
             footer.tables[0].cell(0, 0).text = footer.tables[0].cell(0, 0).text.replace(":КЛАСС:", text_footer)
             footer.tables[0].cell(0, 0).paragraphs[0].alignment = 1
+
     path_file = (
         settings.BASE_DIR +
         "/upload/Metodika_" +
