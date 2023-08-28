@@ -35,7 +35,7 @@ def set_color_cell_header(cell, style):
     cell = cell
     cell.paragraphs[0].style = style
     cell.paragraphs[0].alignment = 1
-    cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="C00000"/>'.format(nsdecls('w'))))
+    cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="bcbcbc"/>'.format(nsdecls('w'))))
 
 
 def add_object_value(document, df_vsn_cls):
@@ -106,7 +106,6 @@ def add_description_not_need(document, df_description):
         run = p.add_run(" - " + vsn.KOMMENT)
         run.font.name = 'Times New Roman'
         run.font.size = Pt(9)
-    cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="bcbcbc"/>'.format(nsdecls('w'))))
 
 
 def add_description_not_need_marnit(document, df_description):
