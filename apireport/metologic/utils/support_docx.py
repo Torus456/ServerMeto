@@ -12,7 +12,6 @@ from docx.oxml import parse_xml
 from docx.enum.text import WD_LINE_SPACING
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.oxml.shared import OxmlElement,qn
 
 
 def fill_dataframe(path, query, connect, project_args, replace_to=[]):
@@ -156,7 +155,7 @@ def create_docx_with_tepmplate(data_js):
             )
             p = document.add_paragraph(
                 row["SNAME"]
-            )        
+            )
         df_obj_cls = df_obj.loc[df_obj["CLS_ID"] == row["CLS_ID"]].head(1)
         if len(df_obj_cls) > 0:
             p = document.add_paragraph(
@@ -1124,7 +1123,7 @@ def create_docx71(data_js):
         "PRJ_ID": data_js.get("project_args").get("prj_id"),
         "INCLF_ID": data_js.get("project_args").get("inclf_id"),
         "AOBJ_ID": data_js.get("project_args").get("aobj_id"),
-    }    
+    }
     # Классы, признаки, значения, объекты, оквед
     df_cls = fill_dataframe(sql_path, 'cls_for_doc.sql', con, project_args)
     df_dvs = fill_dataframe(sql_path, 'dvs_for_doc.sql', con, project_args)
@@ -1336,7 +1335,7 @@ def add_project_name_uni(document, df_obj_uni_cls):
     # Шапка для таблицы объектов эталона
     cell = table_obj.cell(0, 0)
     cell.width = Inches(3.5)
-    add_header_table_style(cell,"Краткое наименование")
+    add_header_table_style(cell, "Краткое наименование")
     set_color_cell_header(cell, "Normal")
     cell = table_obj.cell(0, 1)
     cell.width = Inches(3.5)
@@ -1535,7 +1534,7 @@ def add_dop_type_and_name(document, df_dop_attribute_cls, row):
             a = table.cell(start_union, 0)
             b = table.cell(start_union + k, 0)
             A = a.merge(b)
-            #add_cell_table_style(A, union_name)
+            #  add_cell_table_style(A, union_name)
             A.text = union_name
             add_cell_table_style_for_merge(A, union_name)
             k += 1
@@ -1561,7 +1560,7 @@ def add_object_name_with_value(document, df_obj_cls):
         paragr.add_run(obj.SNAME)
         paragr.autofit = False
         col = paragr.columns[0]
-        col.width=Inches(0.5)
+        col.width = Inches(0.5)
         document.add_paragraph(
             "Пример полного наименования частной записи НМЦ",
             style="List Bullet"
@@ -1570,7 +1569,8 @@ def add_object_name_with_value(document, df_obj_cls):
         paragr.add_run(obj.FNAME)
         paragr.autofit = False
         col = paragr.columns[0]
-        col.width=Inches(0.5)
+        col.width = Inches(0.5)
+
 
 def add_object_name_with_value_uni(document, df_obj_uni_cls):
     """

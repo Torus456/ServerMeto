@@ -55,6 +55,16 @@ select bcls.mlt_id,
        case when isleaf = 1 then ums.name
         else null end "ЕИ",
        to_char(ums.ums_id) ums_id,
+       (select 1 
+        from dual 
+        where exists (select 1 from ocl, obj
+                where ocl.mlt_id = bcls.mlt_id
+                  and ocl.clf_id = bcls.clf_id
+                  and ocl.cls_id = bcls.cls_id
+                  and ocl.mlt_id = obj.mlt_id
+                  and ocl.obj_id = obj.obj_id
+                  and obj.prj_id = 73
+                  and obj.status = 1)) cntobj,
          :prj_id prj_id,
          :cst_id cst_id
 from bcls, nmpp, cum, ums 
@@ -67,4 +77,12 @@ where bcls.mlt_id = nmpp.mlt_id (+)
   and bcls.cls_id = cum.cls_id (+)  
   and cum.cst_id (+) = :cst_id
   and cum.ums_id = ums.ums_id (+)
+  and exists (select 1 from ocl, obj
+                where ocl.mlt_id = bcls.mlt_id
+                  and ocl.clf_id = bcls.clf_id
+                  and ocl.cls_id = bcls.cls_id
+                  and ocl.mlt_id = obj.mlt_id
+                  and ocl.obj_id = obj.obj_id
+                  and obj.prj_id = 73
+                  and obj.status = 1)
 order by bcls.code

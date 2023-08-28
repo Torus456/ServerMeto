@@ -30,16 +30,8 @@ SELECT   b.top_level AS "LEV",
          NULL AS "Наименование класса 2 уровня",
          'Класс' AS "Тип строки",
          NULL AS "Шаб.крат.наим.\Норм.крат.наим.",
-         NULL AS "Шаб.полн.наим.\Норм.полн.наим.",
          NULL AS "Базовая ЕИ класса",
-         NULL AS "Комментарий",
-         op_amr.amrglue (2,
-                         mlt_id,
-                         6,
-                         clf_id,
-                         cls_id,
-                         0,
-                         prj_id) AS "Куратор",    
+         NULL AS "Комментарий",  
          100 AS "DOP",
          b.code AS "Сортировка"
   FROM   bcls b
@@ -53,16 +45,8 @@ SELECT   b.top_level AS "LEV",
          b.name AS "Наименование класса 2 уровня",
          'Класс' AS "Тип строки",
          NULL AS "Шаб.крат.наим.\Норм.крат.наим.",
-         NULL AS "Шаб.полн.наим.\Норм.полн.наим.",
          ums.code AS "Базовая ЕИ класса",
-         NULL AS "Комментарий",
-         op_amr.amrglue (2,
-                         b.mlt_id,
-                         6,
-                         b.clf_id,
-                         b.cls_id,
-                         0,
-                         b.prj_id) AS "Куратор",    
+         NULL AS "Комментарий",  
          100 AS "DOP",
          b.code AS "Сортировка"
   FROM   bcls b, cum, ums
@@ -86,21 +70,8 @@ SELECT   15 AS "LEV",
                               b.CLS_ID,
                               q.sname,
                               1), '&|#', '') AS "Шаб.крат.наим.\Норм.крат.наим.",
-         REGEXP_REPLACE (gen_shbl_cls_pp_ink (:cfv_id,
-                              b.MLT_ID,
-                              b.CLF_ID,
-                              b.CLS_ID,
-                              q.fname,
-                              1), '&|#', '') AS "Шаб.полн.наим.\Норм.полн.наим.",
          NULL AS "Базовая ЕИ класса",
          NULL AS "Комментарий",
-         op_amr.amrglue (2,
-                         b.mlt_id,
-                         6,
-                         b.clf_id,
-                         b.cls_id,
-                         0,
-                         b.prj_id) AS "Куратор",
          150 AS "DOP",
          b.code AS "Сортировка"
 FROM  bcls b, nmpp q
@@ -109,4 +80,12 @@ WHERE b.mlt_id = q.mlt_id
   AND b.cls_id = q.cls_id
   AND b.prj_id = q.prj_id
   AND b.list = 1
-ORDER BY   13, 12, 7
+  and exists (select 1 from ocl, obj
+                where ocl.mlt_id = b.mlt_id
+                  and ocl.clf_id = b.clf_id
+                  and ocl.cls_id = b.cls_id
+                  and ocl.mlt_id = obj.mlt_id
+                  and ocl.obj_id = obj.obj_id
+                  and obj.prj_id = 73
+                  and obj.status = 1)
+ORDER BY   11, 10, 7

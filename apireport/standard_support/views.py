@@ -196,7 +196,7 @@ def parse_yaspeller(request):
     print("Начинаем")
     status = 200
     result = {}
-    result["message"] = "Привет"    
+    result["message"] = "Привет"
     con = cx_Oracle.connect('CS_ART', 'CS_ART', '192.168.54.17:1521/ORA5.INCON.LO')
     df = get_value_for_check(con)
     try:

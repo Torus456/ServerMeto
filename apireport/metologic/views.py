@@ -7,7 +7,8 @@ from .utils.support_excel import (
     fill_excel_for_ns,
     fill_excel_for_ink,
     fill_excel_for_ns_template,
-    fill_excel_comment_for_ink
+    fill_excel_comment_for_ink,
+    fill_excel_for_krost
 )
 from metologic.tasks import send_mail
 
@@ -106,6 +107,19 @@ def get_ink_data_excel(request):
     return JsonResponse(result, status=status)
 
 
+def get_krost_data_excel(request):
+    """ Формируем excel-файл, каждый класс на отдельном листе"""
+    request_data = json.loads(request.body)
+    res = fill_excel_for_krost(request_data)
+    path_file = res.get("path_file")
+    name_file = res.get("name") + ".xlsx"
+    status = 200
+    result = {}
+    result["message"] = "Привет"
+    sendmail(request_data.get("project_args").get("email"), "subject_mail", "text_mail", path_file, str(name_file))
+    return JsonResponse(result, status=status)
+
+
 def get_ink_vendor_comment(request):
     """
     Формирование единого файла с комментариями
@@ -153,6 +167,7 @@ def sev_metodology(request):
     print(name_file)
     sendmail(request_data.get("project_args").get("email"), "subject_mail", "text_mail", path_file, str(name_file))
     return JsonResponse(result, status=status)
+
 
 def get_unipro_data_excel(request):
     request_data = json.loads(request.body)
