@@ -1271,8 +1271,8 @@ def create_docx72(data_js):
     for row in df_cls.itertuples():
         code = "XXX" if row.CODE is None else row.CODE
         # descr = "" if row["DESCR"] is None else "(" + row["DESCR"] + ")"
-        document.add_heading(code + " - " + row.NAME, row.CLV_LEV)
-        cls_text = "«" + code + " - " + row.NAME + "»"
+        document.add_heading(code + " - " + row.NAME + " - " + row.CUR, row.CLV_LEV)
+        cls_text = "«" + code + " - " + row.NAME + " - " + row.CUR + "»"
         # document.add_paragraph().add_run().add_break()
         # Далее заполняем данные для класса
         if row.ISLEAF == 1:
