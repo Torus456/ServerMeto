@@ -39,7 +39,7 @@ nclv as
                           bcls.clf_id,
                           bcls.cls_id,
                           nmpp.name,
-                          1) sname,
+                          4) sname,
                           nmpp.sname nsname
 from bcls, nmpp
 where bcls.mlt_id = nmpp.mlt_id 
@@ -61,8 +61,14 @@ select distinct
        sdv.name,
        sdv.ord,
        case when sgn.valtype = 1 then ums.code else null end ums_code,
-       case when sgn.valtype = 0 then 'Текстовый' 
-            else 'Числовой' end valtype,
+       case when sgn.valtype = 1 then 'Числовой'
+            when sgn.valtype = 0 and (select types
+            from cs_art_load.lpak_sgn_type s
+            where s.cls_id = sdv.cls_id
+            and s.clf_id = sdv.clf_id
+            and s.dvs_id = sdv.dvs_id
+            and s.sgn_id = sdv.sgn_id) = 'Числовой' then 'Числовой'
+            else 'Текстовый' end valtype,
        559 cst_id
 from nclv b, sdv, sgn, ums 
 where b.mlt_id = sdv.mlt_id 

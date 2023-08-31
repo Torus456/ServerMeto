@@ -1295,6 +1295,10 @@ def create_docx72(data_js):
             document.add_paragraph().add_run().add_break()
             df_name_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
             add_project_name(document, df_name_cls)
+            document.add_paragraph().add_run().add_break()
+        if row.ISLEAF == 1:
+            add_cls_descr(document, row)
+        dd_cls_descr = df_cls.loc[df_cls["CLS_ID"] == row.CLS_ID]
         if row.SNAME:
             document.add_page_break()
     # Меняем в заголовке
@@ -1701,3 +1705,20 @@ def add_paragraph_before_table(document, title):
     run.font.name = 'Times New Roman'
     run.font.size = Pt(12)
     run.bold = True
+
+
+def add_cls_descr(document, row):
+    """
+    Добавляем в документ
+    """
+    p = document.add_paragraph(
+        style="List Bullet 2"
+    )
+    run = p.add_run("Спецификация класса")
+    #run.bold = True
+    run.font.name = 'Calibri'
+    run.font.size = Pt(12)
+    #run.underline = True
+    document.add_paragraph(
+        row.DESCR
+    )
