@@ -284,6 +284,43 @@ where c.mlt_id = a.mlt_id
   and q.sgn_id = r.sgn_id (+)
   and q.dvs_id = r.dvs_id (+)
   and q.vsn_id = r.vsn_id (+)
+  and q.sgn_id <> 886818
+   
+  union 
   
+  select c.cfv_id,
+       c.mlt_id,
+       c.clf_id,
+       c.cls_id, 
+       dvs.sgn_id,
+       dvs.dvs_id,
+       vsn.vsn_id,
+       vsn.prj_id,
+       sdv.code code_od,
+       sdv.name,
+       c.code,
+       c.name name_cl,   
+       vsn.valchar val,
+       vsn.symsgn sval,     
+       sdv.ord,
+       null ord_val,
+       null num,
+       null komment
+from bcls c, sdv, sgn, vsn, dvs
+where sdv.mlt_id = c.mlt_id
+  and sdv.clf_id = c.clf_id
+  and sdv.cls_id = c.cls_id
+  and sdv.cfv_id = c.cfv_id
+  and sdv.mlt_id = dvs.mlt_id
+  and sdv.clf_id = dvs.clf_id
+  and sdv.cls_id = dvs.cls_id
+  and sdv.sgn_id = dvs.sgn_id
+  and sdv.dvs_id = dvs.dvs_id
+  and sgn.mlt_id = dvs.mlt_id
+  and sgn.sgn_id = dvs.sgn_id
+  and sgn.mlt_id = vsn.mlt_id
+  and sgn.sgn_id = vsn.sgn_id
+  and vsn.sgn_id = 886818
+  and vsn.vsn_id <> 0
   
   order by code, ord, ord_val, val
