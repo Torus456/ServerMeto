@@ -34,12 +34,18 @@ connect by prior clv.mlt_id = clv.mlt_id
        bcls.prj_id,
        bcls.project_name,
        bcls.isleaf,
-       bcls.clv_lev,                   
+       bcls.clv_lev,
+       (select descr
+       from cs_art_load.lpak_cls_descr cc
+       where bcls.clf_id = cc.clf_id
+       and bcls.cls_id = cc.cls_id
+       and cc.descr is not null) descr,        
        gen_shbl_cls_pp2(47, bcls.mlt_id, bcls.clf_id, bcls.cls_id, nmpp.sname, 1) sname,
        case when isleaf = 1 then  ums.code
            else null end ums_code,
        case when isleaf = 1 then  ums.name
         else null end ums_name,
+        op_amr.amrglue(2,1,6,bcls.clf_id,bcls.cls_id,0,72) cur,
       :prj_id prj_id
 from bcls, nmpp, cum, ums 
 where bcls.mlt_id = nmpp.mlt_id (+) 
@@ -51,5 +57,5 @@ where bcls.mlt_id = nmpp.mlt_id (+)
   and bcls.cls_id = cum.cls_id (+)  
   and cum.cst_id (+) = 559
   and cum.ums_id = ums.ums_id (+)
-
+  and cum.status (+) <> 2
 order by bcls.code

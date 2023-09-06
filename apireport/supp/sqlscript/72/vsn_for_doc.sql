@@ -16,7 +16,7 @@ WITH bcls
                  WHERE status <> 2
                  START WITH cfv_id = :cfv_id
                      AND mlt_id = :mlt_id
-                     AND clf_id = :clf_id
+                     AND clv.clf_id = :clf_id
                      AND cls_id = :cls_id
                  CONNECT BY PRIOR cfv_id = cfv_id
                      AND PRIOR mlt_id = mlt_id
@@ -36,7 +36,7 @@ WITH bcls
                             FROM cls
                             WHERE mlt_id = :mlt_id
                             START WITH mlt_id = :mlt_id 
-                                AND clf_id = :clf_id
+                                AND clf_id in (:clf_id, 6)
                                 AND EXISTS (SELECT 1
                        FROM  bcls
                        WHERE bcls.list = 1
@@ -46,7 +46,7 @@ WITH bcls
                             CONNECT BY PRIOR mlt_id = mlt_id
                                 AND PRIOR clf_id = clf_id
                                 AND PRIOR cls_id = cls_cls_id) a
-                WHERE gen_shbl_dvs_sgn(a.mlt_id,a.clf_id,a.cls_id,:prj_id,1) = gen_shbl_dvs_sgn(a.mlt_id,a.root_clf,a.root_cls,:prj_id,1)),
+                WHERE gen_shbl_dvs_sgn(a.mlt_id,a.clf_id,a.cls_id,:prj_id,4) = gen_shbl_dvs_sgn(a.mlt_id,a.root_clf,a.root_cls,:prj_id,4)),
 xcls
     AS (SELECT b.mlt_id,
                  NVL(z.clf_id, b.clf_id) AS clf_id,
