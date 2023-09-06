@@ -38,6 +38,16 @@ def set_color_cell_header(cell, style):
     cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="bcbcbc"/>'.format(nsdecls('w'))))
 
 
+def set_color_cell_header_magnit(cell, style):
+    """
+    Устанавливаем цвет ячейки, использую для шапки
+    """
+    cell = cell
+    cell.paragraphs[0].style = style
+    cell.paragraphs[0].alignment = 1
+    cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="C00000"/>'.format(nsdecls('w'))))
+
+
 def add_object_value(document, df_vsn_cls):
     """Добавляем значения признаков"""
     values = len(df_vsn_cls)
