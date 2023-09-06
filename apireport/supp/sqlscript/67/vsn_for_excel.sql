@@ -107,7 +107,7 @@ endval as
        case when zdvs.valtype = 1 and to_char(zdvs.vsn_id) = '0'
             then ''
             when zdvs.valtype = 1
-            then replace(regexp_replace(replace(to_char(zdvs.valnum), ',', '.'), '^\.', '0.'), '.', ',') 
+            then replace(regexp_replace(replace(to_char(zdvs.valnum), ',', '.'), '^\.', '0.'), ',', '.') 
             when zdvs.uion = 1 then zdvs.valchar
             else zdvs.valchar
        end val
