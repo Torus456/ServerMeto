@@ -1296,7 +1296,7 @@ def create_docx72(data_js):
             df_name_cls = df_obj.loc[df_obj["CLS_ID"] == row.CLS_ID]
             add_project_name(document, df_name_cls)
             document.add_paragraph().add_run().add_break()
-        if row.ISLEAF == 1:
+        if row.ISLEAF == 1 and row.DESCR is not None:
             add_cls_descr(document, row)
         dd_cls_descr = df_cls.loc[df_cls["CLS_ID"] == row.CLS_ID]
         if row.SNAME:
@@ -1716,8 +1716,8 @@ def add_cls_descr(document, row):
     )
     run = p.add_run("Спецификация класса")
     #run.bold = True
-    run.font.name = 'Calibri'
-    run.font.size = Pt(12)
+    #run.font.name = 'Calibri'
+    #run.font.size = Pt(12)
     #run.underline = True
     document.add_paragraph(
         row.DESCR
